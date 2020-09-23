@@ -7,7 +7,7 @@ const _b = 98, _e = 101, _f = 102, _r = 114, _E = 69,
 function isNum(ch) { return ch >= 48 && ch <= 57 }
 function isNum_(ch) { return isNum(ch) || ch == 95 }
 
-export tokens = new ExternalTokenizer((input, token) => {
+export const tokens = new ExternalTokenizer((input, token) => {
   let pos = token.start, next = input.get(pos)
   if (isNum(next)) {
     do { next = input.get(++pos) } while (isNum_(next))
@@ -36,7 +36,7 @@ export tokens = new ExternalTokenizer((input, token) => {
     if (isFloat) token.accept(Float, pos)
   } else if (next == _b || next == _r) {
     if (next == _b) next = input.read(++pos)
-    if (next != _r) break
+    if (next != _r) return
     next = input.read(++pos)
     let count = 0
     while (next == Hash) { count++; next = input.read(++pos) }
@@ -53,4 +53,4 @@ export tokens = new ExternalTokenizer((input, token) => {
     }
     token.accept(RawString, pos)
   }
-}
+})
