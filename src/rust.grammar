@@ -36,16 +36,18 @@
 @skip { whitespace | LineComment | BlockComment }
 
 @top SourceFile {
+  InnerAttribute*
   statement*
 }
 
 statement {
-  ExpressionStatement | declarationStatement
+  declarationStatement |
+  AttributeItem |
+  blockExpression !statement |
+  nonBlockExpression ";"
 }
 
-ExpressionStatement {
-  blockExpression !statement | nonBlockExpression ";"
-}
+AttributeItem { Attribute+ declarationStatement }
 
 declarationStatement {
   ConstItem {
@@ -59,8 +61,6 @@ declarationStatement {
     )
   } |
   EmptyStatement { ";" } |
-  AttributeItem { Attribute+ declarationStatement } |
-  InnerAttribute |
   ModItem {
     visibility? kw<"mod"> Identifier (";" | DeclarationList)
   } |
@@ -134,7 +134,7 @@ tokenTree {
   tokenIdentifier |
   Metavariable |
   // FIXME all ops
-  UpdateOp | CompareOp |
+  UpdateOp | CompareOp | CompareOp { "<" } |
   "." | ";" | ":" | "=" | "+" | "*" | "&" | "->" | ".." | "..." | "&" | "::" | "!" | "#"
 }
 
@@ -157,7 +157,7 @@ MetaItem {
 }
 
 DeclarationList {
-  "{" declarationStatement* "}"
+  "{" InnerAttribute* (declarationStatement | AttributeItem)* "}"
 }
 
 EnumVariant {
@@ -227,7 +227,7 @@ useClause {
   path |
   UseAsClause { path kw<"as"> Identifier } |
   UseList |
-  ScopedUseList { scope+ UseList } |
+  ScopedUseList { (TopScope scope* | scope+) UseList } |
   UseWildcard { scope* "*" }
 }
 
@@ -271,7 +271,8 @@ type {
   TypeMacroInvocation |
   EmptyType { "!" } |
   DynamicType { kw<"dyn"> (TypeIdentifier | ScopedTypeIdentifier | GenericType | FunctionType) } |
-  BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime }
+  BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime } |
+  integer
 }
 
 FunctionType {
@@ -313,13 +314,13 @@ nonBlockExpression {
   BreakExpression { kw<"break"> LoopLabel? (!return expression)? } |
   ContinueExpression { kw<"continue"> LoopLabel? } |
   IndexExpression { expression !deref "[" expression "]" } |
-  ArrayExpression { "[" Attribute* (expression ";" expression | commaSep1<expression>) "]" } |
-  TupleExpression { "(" Attribute* expression "," (expression ",")* expression? ")" } |
+  ArrayExpression { "[" InnerAttribute* (expression ";" expression | commaSep1<expression>)? "]" } |
+  TupleExpression { "(" InnerAttribute* expression ("," expression?)+ ")" } |
   MacroInvocation |
   UnitExpression { "(" ")" } |
   Metavariable |
   ClosureExpression { kw<"move">? ClosureParameters (("->" type)? !statement Block | expression) } |
-  ParenthesizedExpression { "(" expression ")" } |
+  ParenthesizedExpression { "(" InnerAttribute* expression ")" } |
   StructExpression { structName FieldInitializerList }
 }
 
@@ -330,10 +331,18 @@ blockExpression {
   AsyncBlock { kw<"async"> kw<"move">? Block } |
   Block |
   IfExpression |
-  MatchExpression { kw<"match"> expression MatchBlock { "{" (MatchArm<",">* MatchArm<","?>)? "}" } } |
-  WhileExpression { (LoopLabel ":")? kw<"while"> cond Block } |
-  LoopExpression { (LoopLabel ":")? kw<"loop"> Block } |
-  ForExpression { (LoopLabel ":")? kw<"for"> pattern kw<"in"> expression Block }
+  MatchExpression {
+   kw<"match"> expression MatchBlock { "{" InnerAttribute* (MatchArm<",">* MatchArm<","?>)? "}" }
+  } |
+  WhileExpression {
+    (LoopLabel ":")? kw<"while"> cond Block
+  } |
+  LoopExpression {
+    (LoopLabel ":")? kw<"loop"> Block
+  } |
+  ForExpression {
+    (LoopLabel ":")? kw<"for"> pattern kw<"in"> expression Block
+  }
 }
 
 MacroInvocation {
@@ -344,20 +353,30 @@ TypeMacroInvocation[name=MacroInvocation] {
   (ScopedTypeIdentifier | Identifier) !macro "!" BracketedTokens
 }
 
+TopScope { "::" }
+
+Scope { identifier !scope "::" }
+
+GenericScope { TypeIdentifier !typeArgs TypeArguments "::" }
+
+QualifiedScope { tpOpen type (kw<"as"> type)? tpClose "::" }
+
 scope {
-  Scope { (identifier !scope "::") | "::" } |
-  GenericScope { TypeScope { identifier "::" !typeScope } TypeArguments "::" }
+  Scope |
+  GenericScope { TypeScope { identifier "::" !typeScope } TypeArguments "::" } |
+  QualifiedScope
 }
 
-BracketedType {
-  tpOpen (type | QualifiedType { type kw<"as"> type }) tpClose
-}
+ScopedIdentifier { (TopScope scope* | scope+) Identifier }
 
-ScopedIdentifier { scope+ Identifier }
+typeScope {
+  Scope |
+  GenericScope |
+  QualifiedScope
+}
 
 ScopedTypeIdentifier {
-  ((scope |
-    GenericScope { (TypeIdentifier | BracketedType) TypeArguments "::" }) !typeScope)+
+  (TopScope (typeScope !typeScope)* | (typeScope !typeScope)+)
   TypeIdentifier
 }
 
@@ -367,7 +386,7 @@ structName {
   GenericType { (TypeIdentifier | exprScopedTypeIdentifier) "::" !typeArgs TypeArguments }
 }
 
-exprScopedTypeIdentifier[name=ScopedTypeIdentifier] { scope+ TypeIdentifier }
+exprScopedTypeIdentifier[name=ScopedTypeIdentifier] { (TopScope scope* | scope+) TypeIdentifier }
 
 BinaryExpression {
   expression !add ArithOp { "+" | "-" } expression |
@@ -376,7 +395,7 @@ BinaryExpression {
   expression !bitAnd BitOp { "&" } expression |
   expression !bitXor BitOp { "^" } expression |
   expression !bitOr BitOp { "|" } expression |
-  expression !compare CompareOp expression |
+  expression !compare (CompareOp | CompareOp { "<" }) expression |
   expression !and LogicOp { "&&" } expression |
   expression !or LogicOp { "||" } expression
 }
@@ -396,7 +415,7 @@ fieldInitializer {
 }
 
 IfExpression {
-  kw<"if"> cond Block (!else kw<"else"> (Block | IfExpression))
+  kw<"if"> cond Block (!else kw<"else"> (Block | IfExpression))?
 }
 
 cond {
@@ -409,12 +428,12 @@ GuardPattern { pattern kw<"if"> expression }
 MatchArm<after> {
   Attribute*
   (MacroInvocation | pattern | GuardPattern)
-  "=>" (expression after | !block blockExpression)
+  "=>" (nonBlockExpression after | !block blockExpression)
 }
 
 ClosureParameters { "|" commaSep<pattern | Parameter> "|" }
 
-Block { "{" statement* expression? "}" }
+Block { "{" InnerAttribute* statement* expression? "}" }
 
 pattern {
   literalPattern |
@@ -449,7 +468,10 @@ literal {
   Float
 }
 
-literalPattern { literal | "-" (Integer | Float) }
+literalPattern {
+  literal |
+  NegatedPattern { ArithOp { "-" } (Integer | Float) }
+}
 
 boolean { @specialize[name=Boolean]<identifier, "true" | "false"> }
 
@@ -490,15 +512,16 @@ plusSep<expr> { expr ("+" expr)* }
 
 @external tokens tokens from "./tokens" { RawString, Float }
 
+tpOpen[name="<"] { "<" }
+
 @tokens {
   whitespace { $[ \t\r\n] }
 
   UpdateOp { ($[+\-*/%^&|] | "<<" | ">>") "=" }
 
-  CompareOp { $[<>] "="? | $[!=] "=" }
+  CompareOp { ">" "="? | "<=" | $[!=] "=" }
 
-  tpOpen { "<" }
-  tpClose { ">" }
+  tpClose[name=">"] { ">" }
 
   Integer {
     ($[0-9] $[0-9_]* |
@@ -535,10 +558,9 @@ plusSep<expr> { expr ("+" expr)* }
   @precedence { stringStart, Char, tokenIdentifier }
   @precedence { Char, quoteIdentifier }
   @precedence { Metavariable, "$" }
-  @precedence { CompareOp, tpOpen }
 
   "[" "]" "{" "}" "(" ")"
-  ";" ":" ","
+  ";" ":" "," ">"
   "=" "->" ".." "..." "&"
 }
 

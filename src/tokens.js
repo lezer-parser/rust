@@ -10,13 +10,14 @@ function isNum_(ch) { return isNum(ch) || ch == 95 }
 export const tokens = new ExternalTokenizer((input, token) => {
   let pos = token.start, next = input.get(pos)
   if (isNum(next)) {
+    let isFloat = false
     do { next = input.get(++pos) } while (isNum_(next))
     if (next == Dot) {
       isFloat = true
       next = input.get(++pos)
       if (isNum(next)) {
         do { next = input.get(++pos) } while (isNum_(next))
-      } else if (next == Dot || (next < 0x7f && !/\w/.test(String.fromCharCode(next)))) {
+      } else if (next == Dot || next > 0x7f || /\w/.test(String.fromCharCode(next))) {
         return
       }
     }
