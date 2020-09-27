@@ -91,7 +91,7 @@ declarationStatement {
   } |
   ImplItem {
     kw<"unsafe">? kw<"impl"> TypeParameters?
-    ("!"? (TypeIdentifier | ScopedTypeIdentifier) kw<"for">)? type
+    ("!"? typePath kw<"for">)? type
     WhereClause? DeclarationList
   } |
   TraitItem {
@@ -224,11 +224,11 @@ OptionalTypeParameter {
 }
 
 useClause {
-  path |
-  UseAsClause { path kw<"as"> Identifier } |
+  simplePath |
+  UseAsClause { simplePath kw<"as"> Identifier } |
   UseList |
-  ScopedUseList { (TopScope scope* | scope+) UseList } |
-  UseWildcard { scope* "*" }
+  ScopedUseList { (TopScope Scope* | Scope+) UseList } |
+  UseWildcard { (TopScope Scope* | Scope+)? "*" }
 }
 
 UseList {
@@ -244,7 +244,7 @@ SelfParameter {
 }
 
 Parameter {
-  (!mut kw<"mut">)? (pattern | kw<"self">) ":" type
+  (!mut kw<"mut">)? pattern ":" type
 }
 
 externModifier {
@@ -252,36 +252,32 @@ externModifier {
 }
 
 visibility {
-  kw<"crate"> |
   kw<"pub"> (!call "(" (kw<"self"> | kw<"super"> | kw<"crate"> | kw<"in"> path) ")")?
 }
 
 type {
-  AbstractType { kw<"impl"> (TypeIdentifier | ScopedTypeIdentifier | GenericType | FunctionType) } |
+  AbstractType { kw<"impl"> (typePath | GenericType | FunctionType) } |
   ReferenceType { "&" Lifetime? kw<"mut">? type } |
-  Metavariable |
   PointerType { "*" (kw<"const"> | kw<"mut">) type } |
-  TypeIdentifier |
-  ScopedTypeIdentifier |
+  typePath |
   GenericType |
   TupleType { "(" commaSep1<type> ")" } |
   UnitType { "(" ")" } |
   ArrayType { "[" type (";" expression)? "]" } |
   FunctionType |
-  TypeMacroInvocation |
+  MacroInvocation { typePath !macro "!" BracketedTokens } |
   EmptyType { "!" } |
-  DynamicType { kw<"dyn"> (TypeIdentifier | ScopedTypeIdentifier | GenericType | FunctionType) } |
-  BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime } |
-  integer
+  DynamicType { kw<"dyn"> (typePath | GenericType | FunctionType) } |
+  BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime }
 }
 
 FunctionType {
-  (TypeIdentifier | ScopedTypeIdentifier | functionModifier* kw<"fn">)
+  (typePath | functionModifier* kw<"fn">)
   !params Parameters ("->" type)?
 }
 
 GenericType {
-  (TypeIdentifier | ScopedTypeIdentifier) !typeArgs TypeArguments
+  typePath !typeArgs TypeArguments
 }
 
 TypeArguments {
@@ -305,12 +301,10 @@ nonBlockExpression {
   RangeExpression { expression? !range (".." | "..." | "..=") expression? } |
   CallExpression { expression !call Arguments } |
   literal |
-  Identifier |
-  kw<"self"> |
-  ScopedIdentifier |
-  GenericFunction { (Identifier | ScopedIdentifier | FieldExpression) !typeArgs "::" TypeArguments } |
+  path |
   AwaitExpression { expression !deref "." kw<"await"> } |
   FieldExpression |
+  GenericFunction { FieldExpression !scope "::" TypeArguments } | // non-field generics are handled in `path`
   BreakExpression { kw<"break"> LoopLabel? (!return expression)? } |
   ContinueExpression { kw<"continue"> LoopLabel? } |
   IndexExpression { expression !deref "[" expression "]" } |
@@ -318,7 +312,6 @@ nonBlockExpression {
   TupleExpression { "(" InnerAttribute* expression ("," expression?)+ ")" } |
   MacroInvocation |
   UnitExpression { "(" ")" } |
-  Metavariable |
   ClosureExpression { kw<"move">? ClosureParameters (("->" type)? !statement Block | expression) } |
   ParenthesizedExpression { "(" InnerAttribute* expression ")" } |
   StructExpression { structName FieldInitializerList }
@@ -346,47 +339,67 @@ blockExpression {
 }
 
 MacroInvocation {
-  (ScopedIdentifier | Identifier) !macro "!" BracketedTokens
-}
-
-TypeMacroInvocation[name=MacroInvocation] {
-  (ScopedTypeIdentifier | Identifier) !macro "!" BracketedTokens
+  path !macro "!" BracketedTokens
 }
 
 TopScope { "::" }
 
-Scope { identifier !scope "::" }
+Scope { pathIdent !scope "::" }
 
-GenericScope { TypeIdentifier !typeArgs TypeArguments "::" }
+typeScope[name=Scope] { typePathIdent !scope "::" }
+
+GenericScope { typePathIdent !scope "::"? !typeArgs TypeArguments "::" }
+
+exprGenericScope[name=GenericScope] { pathIdent !scope "::" TypeArguments "::" }
 
 QualifiedScope { tpOpen type (kw<"as"> type)? tpClose "::" }
 
-scope {
-  Scope |
-  GenericScope { TypeScope { identifier "::" !typeScope } TypeArguments "::" } |
-  QualifiedScope
+pathIdent {
+  kw<"self"> |
+  kw<"Self"> |
+  Metavariable |
+  kw<"super"> |
+  kw<"crate"> |
+  PathIdentifier
 }
 
-ScopedIdentifier { (TopScope scope* | scope+) Identifier }
-
-typeScope {
-  Scope |
-  GenericScope |
-  QualifiedScope
+path {
+  pathIdent |
+  GenericFunction { pathIdent !scope "::" TypeArguments } |
+  ScopedIdentifier {
+    ((TopScope | QualifiedScope) (Scope | exprGenericScope)* | (Scope | exprGenericScope)+)
+    (pathIdent | GenericFunction { pathIdent !scope "::" TypeArguments })
+  }
 }
 
-ScopedTypeIdentifier {
-  (TopScope (typeScope !typeScope)* | (typeScope !typeScope)+)
-  TypeIdentifier
+typePathIdent {
+  kw<"self"> |
+  Metavariable |
+  kw<"super"> |
+  kw<"crate"> |
+  PathIdentifier
+}
+
+PathIdentifier { identifier }
+
+typePath {
+  typePathIdent |
+  ScopedTypeIdentifier {
+    ((TopScope | QualifiedScope) (typeScope | GenericScope)* | (typeScope | GenericScope)+) typePathIdent
+  }
+}
+
+simplePath {
+  pathIdent |
+  ScopeIdentifier { (TopScope Scope* | Scope+) pathIdent }
 }
 
 structName {
   TypeIdentifier |
-  exprScopedTypeIdentifier |
-  GenericType { (TypeIdentifier | exprScopedTypeIdentifier) "::" !typeArgs TypeArguments }
+  ScopedTypeIdentifier {
+    ((TopScope | QualifiedScope) (Scope | exprGenericScope)* | (Scope | exprGenericScope)+) TypeIdentifier
+  }
 }
-
-exprScopedTypeIdentifier[name=ScopedTypeIdentifier] { (TopScope scope* | scope+) TypeIdentifier }
 
 BinaryExpression {
   expression !add ArithOp { "+" | "-" } expression |
@@ -437,9 +450,8 @@ Block { "{" InnerAttribute* statement* expression? "}" }
 
 pattern {
   literalPattern |
-  Identifier |
-  ScopedIdentifier |
-  TuplePattern { (Identifier | ScopedIdentifier)? "(" commaSep<pattern> ")" } |
+  path |
+  TuplePattern { path? "(" commaSep<pattern> ")" } |
   StructPattern {
     structName
     FieldPatternList { "{" commaSep<FieldPattern | ".."> "}" }
@@ -474,15 +486,6 @@ literalPattern {
 }
 
 boolean { @specialize[name=Boolean]<identifier, "true" | "false"> }
-
-path {
-  kw<"self"> |
-  Metavariable |
-  kw<"super"> |
-  kw<"crate"> |
-  Identifier |
-  ScopedIdentifier
-}
 
 @skip {} {
   BlockComment { "/*" (BlockComment | blockCommentContent)* "*/" }
@@ -560,7 +563,7 @@ tpOpen[name="<"] { "<" }
   @precedence { Metavariable, "$" }
 
   "[" "]" "{" "}" "(" ")"
-  ";" ":" "," ">"
+  ";" ":" "::" "," ">"
   "=" "->" ".." "..." "&"
 }
 
