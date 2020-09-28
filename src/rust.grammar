@@ -421,16 +421,19 @@ cond {
   expression |
   LetDeclaration { kw<"let"> pattern "=" expression }
 }
-  
-GuardPattern { pattern kw<"if"> expression }
+
+Guard { kw<"if"> expression }
 
 MatchArm<after> {
   Attribute*
-  (MacroInvocation | pattern | GuardPattern)
+  (MacroInvocation | pattern) ("|" (MacroInvocation | pattern))*
+  Guard?
   "=>" (nonBlockExpression after | !block blockExpression)
 }
 
-ClosureParameters { "|" commaSep<pattern | Parameter> "|" }
+ClosureParameters[name=Parameters] {
+  closureParamDelim commaSep<Parameter { (!mut kw<"mut">)? pattern (":" type)?}> closureParamDelim
+}
 
 Block { "{" InnerAttribute* statement* expression? "}" }
 
@@ -449,7 +452,6 @@ pattern {
   ".." |
   MutPattern { kw<"mut"> pattern } |
   RangePattern { (literalPattern | path) ("..." | "..=") (literalPattern | path) } |
-  OrPattern { pattern !or "|" pattern } |
   kw<"_">
 }
 
@@ -501,7 +503,7 @@ commaSep1<expr> { expr ("," expr?)* }
 
 plusSep<expr> { expr ("+" expr)* }
 
-@external tokens tokens from "./tokens" { RawString, Float }
+@external tokens tokens from "./tokens" { RawString, Float, closureParamDelim[name="|"] }
 
 tpOpen[name="<"] { "<" }
 
