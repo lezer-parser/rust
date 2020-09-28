@@ -7,7 +7,7 @@ fn main() {
 ==>
 
 SourceFile(
-  FunctionItem(fn,Identifier, ParamList, Block(
+  FunctionItem(fn,BoundIdentifier, ParamList, Block(
     Identifier)))
 
 
@@ -21,7 +21,7 @@ fn main() {
 
 SourceFile(
   FunctionItem(fn,
-    Identifier,
+    BoundIdentifier,
     ParamList,
     Block(
       FieldExpression(
@@ -314,7 +314,7 @@ let y = if x == 5 { 10 } else { 15 };
 
 SourceFile(
   FunctionItem(fn,
-    Identifier,
+    BoundIdentifier,
     ParamList,
     Block(
       IfExpression(if,
@@ -703,6 +703,6 @@ const a : A = unsafe { foo() };
 
 SourceFile(
   ConstItem(const,
-    Identifier,
+    BoundIdentifier,
     TypeIdentifier,
     UnsafeBlock(unsafe, Block(CallExpression(Identifier, ArgList)))))

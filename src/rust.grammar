@@ -23,10 +23,11 @@
   typeArgs
   block
   bind
+  plusSep
   bound @left
-  typeScope
   scope
-  pub
+  crateVis
+  selfParam
   mut @cut
   statement
 }
@@ -49,7 +50,7 @@ AttributeItem { Attribute+ declarationStatement }
 
 declarationStatement {
   ConstItem {
-    visibility? kw<"const"> Identifier ":" type ("=" expression)? ";"
+    Vis? kw<"const"> BoundIdentifier ":" type ("=" expression)? ";"
   } |
   MacroInvocation !statement |
   MacroDefinition {
@@ -60,30 +61,30 @@ declarationStatement {
   } |
   EmptyStatement { ";" } |
   ModItem {
-    visibility? kw<"mod"> Identifier (";" | DeclarationList)
+    Vis? kw<"mod"> BoundIdentifier (";" | DeclarationList)
   } |
   ForeignModItem {
-    visibility? externModifier (";" | DeclarationList)
+    Vis? externModifier (";" | DeclarationList)
   } |
   StructItem {
-    visibility? kw<"struct">
+    Vis? kw<"struct">
     TypeIdentifier TypeParamList?
     (WhereClause? FieldDeclarationList | OrderedFieldDeclarationList WhereClause? ";" | ";")
   } |
   UnionItem {
-    visibility? ckw<"union">
+    Vis? ckw<"union">
     TypeIdentifier TypeParamList? WhereClause? FieldDeclarationList
   } |
   EnumItem {
-    visibility? kw<"enum"> TypeIdentifier TypeParamList? WhereClause?
+    Vis? kw<"enum"> TypeIdentifier TypeParamList? WhereClause?
     EnumVariantList { "{" commaSep<Attribute* EnumVariant> "}" }
   } |
   TypeItem {
-    visibility? kw<"type"> TypeIdentifier TypeParamList? "=" type ";"
+    Vis? kw<"type"> TypeIdentifier TypeParamList? "=" type ";"
   } |
   FunctionItem {
-    visibility? functionModifier* kw<"fn">
-    (Identifier | Metavariable) TypeParamList? ParamList ("->" type)?
+    Vis? functionModifier* kw<"fn">
+    (BoundIdentifier | Metavariable) TypeParamList? ParamList ("->" type)?
     WhereClause?
     (Block | ";")
   } |
@@ -93,7 +94,7 @@ declarationStatement {
     WhereClause? DeclarationList
   } |
   TraitItem {
-    visibility? kw<"unsafe">? kw<"trait"> TypeIdentifier TypeParamList? TraitBounds? WhereClause? DeclarationList
+    Vis? kw<"unsafe">? kw<"trait"> TypeIdentifier TypeParamList? TraitBounds? WhereClause? DeclarationList
   } |
   AssociatedType {
     kw<"type"> TypeIdentifier TraitBounds? ";"
@@ -102,13 +103,13 @@ declarationStatement {
     kw<"let"> (!mut kw<"mut">)? pattern (":" type)? ("=" expression)? ";"
   } |
   UseDeclaration {
-    visibility? kw<"use"> useClause ";"
+    Vis? kw<"use"> useClause ";"
   } |
   ExternCrateDeclaration {
-    visibility? kw<"extern"> kw<"crate"> Identifier (kw<"as"> Identifier)? ";"
+    Vis? kw<"extern"> kw<"crate"> (BoundIdentifier | Identifier kw<"as"> BoundIdentifier) ";"
   } |
   StaticItem {
-    visibility? kw<"static"> kw<"ref">? kw<"mut">? Identifier ":" type ("=" expression)? ";"
+    Vis? kw<"static"> kw<"ref">? kw<"mut">? BoundIdentifier ":" type ("=" expression)? ";"
   }
 }
 
@@ -159,7 +160,7 @@ DeclarationList {
 }
 
 EnumVariant {
-  visibility? Identifier (FieldDeclarationList | OrderedFieldDeclarationList)? ("=" expression)?
+  Vis? Identifier (FieldDeclarationList | OrderedFieldDeclarationList)? ("=" expression)?
 }
 
 FieldDeclarationList {
@@ -167,11 +168,11 @@ FieldDeclarationList {
 }
 
 FieldDeclaration {
-  visibility? FieldIdentifier ":" type
+  Vis? FieldIdentifier ":" type
 }
 
 OrderedFieldDeclarationList {
-  "(" commaSep<Attribute* visibility? type> ")"
+  "(" commaSep<Attribute* Vis? type> ")"
 }
 
 functionModifier {
@@ -179,12 +180,12 @@ functionModifier {
 }
 
 WhereClause {
-  kw<"where"> commaSep1<WherePredicate>
+  kw<"where"> commaSep<LifetimeClause | TypeBoundClause>
 }
 
-WherePredicate {
-  type TraitBounds
-}
+LifetimeClause { Lifetime ":" plusSep<Lifetime> }
+
+TypeBoundClause { (HigherRankedTraitBound | type) TraitBounds }
 
 TraitBounds {
   ":" plusSep<type | Lifetime | HigherRankedTraitBound | RemovedTraitBound>
@@ -210,7 +211,7 @@ TypeParamList {
 }
 
 ConstParameter {
-  kw<"const"> Identifier ":" type
+  kw<"const"> BoundIdentifier ":" type
 }
 
 ConstrainedTypeParameter {
@@ -222,11 +223,12 @@ OptionalTypeParameter {
 }
 
 useClause {
-  simplePath |
-  UseAsClause { simplePath kw<"as"> Identifier } |
+  BoundIdentifier |
+  ScopedIdentifier { simplePathPrefix BoundIdentifier } |
+  UseAsClause { simplePath kw<"as"> BoundIdentifier } |
   UseList |
-  ScopedUseList { simplePath !scope "::" UseList } |
-  UseWildcard { simplePath !scope "::" "*" }
+  ScopedUseList { simplePathPrefix UseList } |
+  UseWildcard { simplePathPrefix? "*" }
 }
 
 UseList {
@@ -234,11 +236,11 @@ UseList {
 }
 
 ParamList {
-  "(" commaSep<Attribute* (Parameter | SelfParameter | "..." | kw<"_">)> ")"
+  "(" commaSep<Attribute* (Parameter | SelfParameter | VariadicParameter { "..." } | kw<"_">)> ")"
 }
 
 SelfParameter {
-  "&"? Lifetime? kw<"mut">? kw<"self">
+  "&"? Lifetime? (!mut kw<"mut">)? !selfParam kw<"self">
 }
 
 Parameter {
@@ -249,8 +251,9 @@ externModifier {
   kw<"extern"> String?
 }
 
-visibility {
-  kw<"pub"> (!call "(" (kw<"self"> | kw<"super"> | kw<"crate"> | kw<"in"> path) ")")?
+Vis {
+  kw<"pub"> (!call "(" (kw<"self"> | kw<"super"> | kw<"crate"> | kw<"in"> path) ")")? |
+  kw<"crate"> !crateVis
 }
 
 type {
@@ -271,7 +274,10 @@ type {
 
 FunctionType {
   (typePath | functionModifier* kw<"fn">)
-  !params ParamList ("->" type)?
+  !params ParamList {
+    "(" commaSep<Attribute* SelfParameter | VariadicParameter { "..." } | kw<"_"> | Parameter { type }> ")"
+  }
+  ("->" type)?
 }
 
 GenericType {
@@ -351,13 +357,13 @@ pathIdent<and> {
 }
 
 pathSegment {
-  pathIdent<ScopeIdentifier | kw<"Self">> ~path !scope "::" (TypeArgList "::")?
+  pathIdent<ScopeIdentifier> ~path !scope "::" (TypeArgList "::")?
 }
 
 path {
-  pathIdent<Identifier | kw<"Self">> ~path |
+  pathIdent<Identifier> ~path |
   ScopedIdentifier {
-    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier | kw<"Self">> ~path
+    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier> ~path
   }
 }
 
@@ -372,25 +378,27 @@ typePath {
   }
 }
 
+simplePathPrefix[inline] {
+  "::" (pathIdent<ScopeIdentifier> ~path !scope "::")* |
+  (pathIdent<ScopeIdentifier> ~path !scope "::")+
+}
+
 simplePath {
   pathIdent<Identifier> ~path |
-  ScopedIdentifier {
-    ("::" (pathIdent<ScopeIdentifier> ~path !scope "::")* | (pathIdent<ScopeIdentifier> ~path !scope "::")+)
-    pathIdent<Identifier> ~path
-  }
+  ScopedIdentifier { simplePathPrefix pathIdent<Identifier> ~path }
 }
 
 structName {
-  pathIdent<TypeIdentifier | kw<"Self">> ~path |
+  pathIdent<TypeIdentifier> ~path |
   ScopedTypeIdentifier {
-    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<TypeIdentifier | kw<"Self">> ~path
+    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<TypeIdentifier> ~path
   }
 }
 
 patternPath {
-  pathIdent<BoundIdentifier | kw<"Self">> ~path |
+  pathIdent<BoundIdentifier> ~path |
   ScopedIdentifier {
-    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier | kw<"Self">> ~path
+    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier> ~path
   }
 }
 
@@ -485,7 +493,7 @@ boolean { @specialize[name=Boolean]<identifier, "true" | "false"> }
 @skip {} {
   BlockComment { "/*" (BlockComment | blockCommentContent)* "*/" }
 
-  String { stringStart (Escape | stringContent) stringEnd }
+  String { stringStart (Escape | stringContent)* stringEnd }
 }
 
 Identifier { identifier }
@@ -510,7 +518,7 @@ commaSep<expr> { commaSep1<expr>? }
 
 commaSep1<expr> { expr ("," expr?)* }
 
-plusSep<expr> { expr ("+" expr)* }
+plusSep<expr> { expr (!plusSep "+" expr)* }
 
 @external tokens tokens from "./tokens" { RawString, Float, closureParamDelim[name="|"] }
 
