@@ -387,6 +387,13 @@ structName {
   }
 }
 
+patternPath {
+  pathIdent<BoundIdentifier | kw<"Self">> ~path |
+  ScopedIdentifier {
+    (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier | kw<"Self">> ~path
+  }
+}
+
 BinaryExpression {
   expression !add ArithOp { "+" | "-" } expression |
   expression !mult ArithOp { "*" | "/" | "%" } expression |
@@ -439,15 +446,15 @@ Block { "{" InnerAttribute* statement* expression? "}" }
 
 pattern {
   literalPattern |
-  path |
-  TuplePattern { path? "(" commaSep<pattern> ")" } |
+  patternPath |
+  TuplePattern { structName? "(" commaSep<pattern> ")" } |
   StructPattern {
     structName
     FieldPatternList { "{" commaSep<FieldPattern | ".."> "}" }
   } |
   RefPattern { kw<"ref"> pattern } |
   SlicePattern { "[" commaSep<pattern> "]" } |
-  CapturedPattern { Identifier "@" pattern } |
+  CapturedPattern { BoundIdentifier "@" pattern } |
   ReferencePattern { "&" !mut kw<"mut">? pattern } |
   ".." |
   MutPattern { kw<"mut"> pattern } |
@@ -488,6 +495,8 @@ TypeIdentifier { identifier }
 FieldIdentifier { identifier }
 
 ScopeIdentifier { identifier }
+
+BoundIdentifier { identifier }
 
 LoopLabel { quoteIdentifier }
 

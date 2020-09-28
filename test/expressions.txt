@@ -167,13 +167,13 @@ SourceFile(
     as,
     TypeIdentifier),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     TypeCastExpression(
       Identifier,
       as,
       TypeIdentifier)),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     TypeIdentifier,
     TypeCastExpression(
       CallExpression(
@@ -242,7 +242,7 @@ SourceFile(
   UnitExpression,
   TupleExpression(Integer),
   LetDeclaration(let,
-    TuplePattern(Identifier, Identifier, Identifier),
+    TuplePattern(BoundIdentifier, BoundIdentifier, BoundIdentifier),
     TupleExpression(Integer, Integer, Integer)))
 
 
@@ -263,7 +263,7 @@ SourceFile(
       FieldInitializer(FieldIdentifier, Float),
       FieldInitializer(FieldIdentifier, Float))),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     StructExpression(
       TypeIdentifier,
       FieldInitializerList(
@@ -273,7 +273,7 @@ SourceFile(
         ShorthandFieldInitializer(
           Identifier)))),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     StructExpression(
       ScopedTypeIdentifier(ScopeIdentifier, TypeIdentifier),
       FieldInitializerList(
@@ -290,7 +290,7 @@ let u = User{name, ..current_user()};
 
 SourceFile(
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     StructExpression(
       TypeIdentifier,
       FieldInitializerList(
@@ -333,7 +333,7 @@ SourceFile(
           else,
           Block)))),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     IfExpression(if,
       BinaryExpression(
         Identifier,
@@ -352,7 +352,7 @@ if let ("Bacon", b) = dish {
 ==>
 
 SourceFile(
-  IfExpression(if, LetDeclaration(let, TuplePattern(String, Identifier), Identifier), Block))
+  IfExpression(if, LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier), Block))
 
 
 # While let expressions
@@ -364,7 +364,7 @@ while let ("Bacon", b) = dish {
 
 SourceFile(
   WhileExpression(while,
-    LetDeclaration(let, TuplePattern(String, Identifier), Identifier),
+    LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier),
     Block))
 
 
@@ -425,7 +425,7 @@ SourceFile(
         String),
       MatchArm(_, String))),
   LetDeclaration(let,
-    Identifier,
+    BoundIdentifier,
     MatchExpression(match,
       Identifier,
       MatchBlock(
@@ -435,7 +435,7 @@ SourceFile(
           Integer,
           String),
         MatchArm(
-          Identifier,
+          BoundIdentifier,
           Guard(if,
             BinaryExpression(
               Identifier,
@@ -443,7 +443,7 @@ SourceFile(
               Integer)),
           String),
         MatchArm(
-          Identifier,
+          BoundIdentifier,
           Guard(if,
             BinaryExpression(
               Identifier,
@@ -511,12 +511,12 @@ for i in 0..256 {
 ==>
 
 SourceFile(
-  ForExpression(for,Identifier, in, Identifier, Block(
+  ForExpression(for,BoundIdentifier, in, Identifier, Block(
     CallExpression(Identifier, ArgList(Identifier)))),
-  ForExpression(for,Identifier, in, RangeExpression(Integer, Integer), Block(
+  ForExpression(for,BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
     CallExpression(Identifier, ArgList(Identifier)))),
-  ForExpression(LoopLabel, for, Identifier, in, RangeExpression(Integer, Integer), Block(
-    ForExpression(LoopLabel, for, Identifier, in, RangeExpression(Integer, Integer), Block(
+  ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
+    ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
       IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer), Block(
         ContinueExpression(continue,LoopLabel))),
       IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer), Block(
@@ -660,7 +660,7 @@ SourceFile(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(
       ClosureExpression(
-        ParamList(Parameter(TuplePattern(Identifier, Identifier))),
+        ParamList(Parameter(TuplePattern(BoundIdentifier, BoundIdentifier))),
         CallExpression(
           FieldExpression(Identifier, FieldIdentifier),
           ArgList(Identifier))))),
@@ -668,7 +668,7 @@ SourceFile(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(
       ClosureExpression(move,
-        ParamList(Parameter(mut, Identifier)),
+        ParamList(Parameter(mut, BoundIdentifier)),
         Block(
           CallExpression(Identifier, ArgList(Identifier)),
           CallExpression(Identifier, ArgList(Identifier)))))),
@@ -691,7 +691,7 @@ SourceFile(
   CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(ClosureExpression(
-      ParamList(Parameter(Identifier, TypeIdentifier)),
+      ParamList(Parameter(BoundIdentifier, TypeIdentifier)),
       CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList(Identifier))))))
 
 
