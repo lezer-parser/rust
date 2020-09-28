@@ -67,33 +67,33 @@ declarationStatement {
   } |
   StructItem {
     visibility? kw<"struct">
-    TypeIdentifier TypeParameters?
+    TypeIdentifier TypeParamList?
     (WhereClause? FieldDeclarationList | OrderedFieldDeclarationList WhereClause? ";" | ";")
   } |
   UnionItem {
     visibility? ckw<"union">
-    TypeIdentifier TypeParameters? WhereClause? FieldDeclarationList
+    TypeIdentifier TypeParamList? WhereClause? FieldDeclarationList
   } |
   EnumItem {
-    visibility? kw<"enum"> TypeIdentifier TypeParameters? WhereClause?
+    visibility? kw<"enum"> TypeIdentifier TypeParamList? WhereClause?
     EnumVariantList { "{" commaSep<Attribute* EnumVariant> "}" }
   } |
   TypeItem {
-    visibility? kw<"type"> TypeIdentifier TypeParameters? "=" type ";"
+    visibility? kw<"type"> TypeIdentifier TypeParamList? "=" type ";"
   } |
   FunctionItem {
     visibility? functionModifier* kw<"fn">
-    (Identifier | Metavariable) TypeParameters? Parameters ("->" type)?
+    (Identifier | Metavariable) TypeParamList? ParamList ("->" type)?
     WhereClause?
     (Block | ";")
   } |
   ImplItem {
-    kw<"unsafe">? kw<"impl"> TypeParameters?
+    kw<"unsafe">? kw<"impl"> TypeParamList?
     ("!"? typePath kw<"for">)? type
     WhereClause? DeclarationList
   } |
   TraitItem {
-    visibility? kw<"unsafe">? kw<"trait"> TypeIdentifier TypeParameters? TraitBounds? WhereClause? DeclarationList
+    visibility? kw<"unsafe">? kw<"trait"> TypeIdentifier TypeParamList? TraitBounds? WhereClause? DeclarationList
   } |
   AssociatedType {
     kw<"type"> TypeIdentifier TraitBounds? ";"
@@ -191,14 +191,14 @@ TraitBounds {
 }
 
 HigherRankedTraitBound {
-  kw<"for"> TypeParameters type
+  kw<"for"> TypeParamList type
 }
 
 RemovedTraitBound {
   "?" type
 }
 
-TypeParameters {
+TypeParamList {
   tpOpen commaSep<(
     Lifetime |
     Metavariable |
@@ -233,7 +233,7 @@ UseList {
   "{" commaSep<useClause> "}"
 }
 
-Parameters {
+ParamList {
   "(" commaSep<Attribute* (Parameter | SelfParameter | "..." | kw<"_">)> ")"
 }
 
@@ -271,14 +271,14 @@ type {
 
 FunctionType {
   (typePath | functionModifier* kw<"fn">)
-  !params Parameters ("->" type)?
+  !params ParamList ("->" type)?
 }
 
 GenericType {
-  typePath !typeArgs TypeArguments
+  typePath !typeArgs TypeArgList
 }
 
-TypeArguments {
+TypeArgList {
   tpOpen commaSep1<type | TypeBinding | Lifetime | literal | Block> tpClose
 }
 
@@ -297,12 +297,12 @@ nonBlockExpression {
   TypeCastExpression { expression !cast kw<"as"> type } |
   ReturnExpression { kw<"return"> (!return expression)? } |
   RangeExpression { expression? !range (".." | "..." | "..=") expression? } |
-  CallExpression { expression !call Arguments } |
+  CallExpression { expression !call ArgList } |
   literal |
   path |
   AwaitExpression { expression !deref "." kw<"await"> } |
   FieldExpression |
-  GenericFunction { (path | FieldExpression) !scope "::" TypeArguments } |
+  GenericFunction { (path | FieldExpression) !scope "::" TypeArgList } |
   BreakExpression { kw<"break"> LoopLabel? (!return expression)? } |
   ContinueExpression { kw<"continue"> LoopLabel? } |
   IndexExpression { expression !deref "[" expression "]" } |
@@ -310,7 +310,7 @@ nonBlockExpression {
   TupleExpression { "(" InnerAttribute* expression ("," expression?)+ ")" } |
   MacroInvocation |
   UnitExpression { "(" ")" } |
-  ClosureExpression { kw<"move">? ClosureParameters (("->" type)? !statement Block | expression) } |
+  ClosureExpression { kw<"move">? ClosureParamList (("->" type)? !statement Block | expression) } |
   ParenthesizedExpression { "(" InnerAttribute* expression ")" } |
   StructExpression { structName FieldInitializerList }
 }
@@ -351,30 +351,30 @@ pathIdent<and> {
 }
 
 pathSegment {
-  pathIdent<ScopeIdentifier | kw<"Self">> ~path !scope "::" (TypeArguments "::")?
+  pathIdent<ScopeIdentifier | kw<"Self">> ~path !scope "::" (TypeArgList "::")?
 }
 
 path {
   pathIdent<Identifier | kw<"Self">> ~path |
-  ScopeIdentifier {
+  ScopedIdentifier {
     (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier | kw<"Self">> ~path
   }
 }
 
 typePathSegment {
-  pathIdent<ScopeIdentifier> ~path ((!scope "::")? TypeArguments)? !scope "::"
+  pathIdent<ScopeIdentifier> ~path ((!scope "::")? TypeArgList)? !scope "::"
 }
 
 typePath {
   pathIdent<TypeIdentifier> ~path |
-  ScopeTypeIdentifier {
+  ScopedTypeIdentifier {
     (("::" | QualifiedScope !scope "::") typePathSegment* | typePathSegment+) pathIdent<TypeIdentifier> ~path
   }
 }
 
 simplePath {
   pathIdent<Identifier> ~path |
-  ScopeIdentifier {
+  ScopedIdentifier {
     ("::" (pathIdent<ScopeIdentifier> ~path !scope "::")* | (pathIdent<ScopeIdentifier> ~path !scope "::")+)
     pathIdent<Identifier> ~path
   }
@@ -382,7 +382,7 @@ simplePath {
 
 structName {
   pathIdent<TypeIdentifier | kw<"Self">> ~path |
-  ScopeIdentifier {
+  ScopedTypeIdentifier {
     (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<TypeIdentifier | kw<"Self">> ~path
   }
 }
@@ -399,7 +399,7 @@ BinaryExpression {
   expression !or LogicOp { "||" } expression
 }
 
-Arguments {
+ArgList {
   "(" commaSep<Attribute* expression> ")"
 }
 
@@ -431,7 +431,7 @@ MatchArm<after> {
   "=>" (nonBlockExpression after | !block blockExpression)
 }
 
-ClosureParameters[name=Parameters] {
+ClosureParamList[name=ParamList] {
   closureParamDelim commaSep<Parameter { (!mut kw<"mut">)? pattern (":" type)?}> closureParamDelim
 }
 

@@ -7,7 +7,7 @@ fn main() {
 ==>
 
 SourceFile(
-  FunctionItem(fn,Identifier, Parameters, Block(
+  FunctionItem(fn,Identifier, ParamList, Block(
     Identifier)))
 
 
@@ -22,7 +22,7 @@ fn main() {
 SourceFile(
   FunctionItem(fn,
     Identifier,
-    Parameters,
+    ParamList,
     Block(
       FieldExpression(
         ParenthesizedExpression(
@@ -63,7 +63,7 @@ a.unwrap()?;
 ==>
 
 SourceFile(
-  TryExpression(CallExpression(FieldExpression(Identifier, FieldIdentifier), Arguments)))
+  TryExpression(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList)))
 
 
 # Binary operator expressions
@@ -178,7 +178,7 @@ SourceFile(
     TypeCastExpression(
       CallExpression(
         Identifier,
-        Arguments(Identifier)),
+        ArgList(Identifier)),
       as,
       TypeIdentifier)))
 
@@ -197,13 +197,13 @@ add(
 SourceFile(
   CallExpression(
     Identifier,
-    Arguments),
+    ArgList),
   CallExpression(
     Identifier,
-    Arguments(Integer, Integer)),
+    ArgList(Integer, Integer)),
   CallExpression(
     Identifier,
-    Arguments(Integer, Integer)))
+    ArgList(Integer, Integer)))
 
 
 # Array expressions
@@ -275,7 +275,7 @@ SourceFile(
   LetDeclaration(let,
     Identifier,
     StructExpression(
-      ScopedTypeIdentifier(Scope, TypeIdentifier),
+      ScopedTypeIdentifier(ScopeIdentifier, TypeIdentifier),
       FieldInitializerList(
         FieldInitializer(FieldIdentifier, String),
         FieldInitializer(FieldIdentifier, Integer),
@@ -296,7 +296,7 @@ SourceFile(
       FieldInitializerList(
         ShorthandFieldInitializer(
           Identifier),
-        BaseFieldInitializer(CallExpression(Identifier, Arguments))))))
+        BaseFieldInitializer(CallExpression(Identifier, ArgList))))))
 
 
 # If expressions
@@ -315,7 +315,7 @@ let y = if x == 5 { 10 } else { 15 };
 SourceFile(
   FunctionItem(fn,
     Identifier,
-    Parameters,
+    ParamList,
     Block(
       IfExpression(if,
         BinaryExpression(
@@ -430,25 +430,21 @@ SourceFile(
       Identifier,
       MatchBlock(
         MatchArm(
-          OrPattern(
-              OrPattern(
-                Integer,
-                Integer),
-              Integer),
+          Integer,
+          Integer,
+          Integer,
           String),
         MatchArm(
-          GuardPattern(
-            Identifier,
-            if,
+          Identifier,
+          Guard(if,
             BinaryExpression(
               Identifier,
               CompareOp,
               Integer)),
           String),
         MatchArm(
-          GuardPattern(
-            Identifier,
-            if,
+          Identifier,
+          Guard(if,
             BinaryExpression(
               Identifier,
               CompareOp,
@@ -516,9 +512,9 @@ for i in 0..256 {
 
 SourceFile(
   ForExpression(for,Identifier, in, Identifier, Block(
-    CallExpression(Identifier, Arguments(Identifier)))),
+    CallExpression(Identifier, ArgList(Identifier)))),
   ForExpression(for,Identifier, in, RangeExpression(Integer, Integer), Block(
-    CallExpression(Identifier, Arguments(Identifier)))),
+    CallExpression(Identifier, ArgList(Identifier)))),
   ForExpression(LoopLabel, for, Identifier, in, RangeExpression(Integer, Integer), Block(
     ForExpression(LoopLabel, for, Identifier, in, RangeExpression(Integer, Integer), Block(
       IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer), Block(
@@ -538,14 +534,14 @@ value.0.1.iter();
 
 SourceFile(
   FieldExpression(Identifier, FieldIdentifier),
-  FieldExpression(CallExpression(Identifier, Arguments), FieldIdentifier),
+  FieldExpression(CallExpression(Identifier, ArgList), FieldIdentifier),
   CallExpression(
     FieldExpression(
       FieldExpression(FieldExpression(Identifier, Integer), Integer),
       FieldIdentifier),
-    Arguments),
+    ArgList),
   CallExpression(
-    FieldExpression(Integer, FieldIdentifier), Arguments(Integer)))
+    FieldExpression(Integer, FieldIdentifier), ArgList(Integer)))
 
 
 # Method call expressions
@@ -554,7 +550,7 @@ mystruct.foo();
 
 ==>
 
-SourceFile(CallExpression(FieldExpression(Identifier, FieldIdentifier), Arguments))
+SourceFile(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList))
 
 
 # Index expressions
@@ -585,15 +581,15 @@ C::<D>::e();
 
 SourceFile(
   CallExpression(
-    ScopedIdentifier(Scope, Identifier),
-    Arguments),
+    ScopedIdentifier(ScopeIdentifier, Identifier),
+    ArgList),
   CallExpression(
     ScopedIdentifier(
-      GenericScope(TypeScope, TypeArguments(TypeIdentifier)),
+      ScopeIdentifier, TypeArgList(TypeIdentifier),
       Identifier),
-    Arguments),
-  CallExpression(ScopedIdentifier(TopScope, Identifier), Arguments),
-  CallExpression(ScopedIdentifier(TopScope, Scope, Identifier), Arguments))
+    ArgList),
+  CallExpression(ScopedIdentifier(Identifier), ArgList),
+  CallExpression(ScopedIdentifier(ScopeIdentifier, Identifier), ArgList))
 
 
 # Scoped functions with fully qualified syntax
@@ -607,7 +603,7 @@ SourceFile(
     ScopedIdentifier(
       QualifiedScope(TypeIdentifier, as, TypeIdentifier),
       Identifier),
-    Arguments(Identifier)))
+    ArgList(Identifier)))
 
 
 # Scoped functions with macros as types
@@ -619,9 +615,9 @@ SourceFile(
 SourceFile(
   CallExpression(
     ScopedIdentifier(
-      QualifiedScope(MacroInvocation(Identifier, BracketedTokens)),
+      QualifiedScope(MacroInvocation(TypeIdentifier, BracketedTokens)),
       Identifier),
-    Arguments))
+    ArgList))
 
 
 # Generic functions
@@ -635,17 +631,17 @@ SourceFile(
   CallExpression(
     GenericFunction(
       ScopedIdentifier(
-        Identifier,
+        ScopeIdentifier,
         Identifier),
-      TypeArguments(
+      TypeArgList(
         TypeIdentifier)),
-    Arguments),
+    ArgList),
   CallExpression(
     GenericFunction(
       Identifier,
-      TypeArguments(
+      TypeArgList(
         Integer)),
-    Arguments))
+    ArgList))
 
 
 # Closures
@@ -662,25 +658,25 @@ h(|| -> i { j });
 SourceFile(
   CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
-    Arguments(
+    ArgList(
       ClosureExpression(
-        ClosureParameters(TuplePattern(Identifier, Identifier)),
+        ParamList(Parameter(TuplePattern(Identifier, Identifier))),
         CallExpression(
           FieldExpression(Identifier, FieldIdentifier),
-          Arguments(Identifier))))),
+          ArgList(Identifier))))),
   CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
-    Arguments(
-      ClosureExpression(
-        ClosureParameters(MutPattern(mut, Identifier)),
+    ArgList(
+      ClosureExpression(move,
+        ParamList(Parameter(mut, Identifier)),
         Block(
-          CallExpression(Identifier, Arguments(Identifier)),
-          CallExpression(Identifier, Arguments(Identifier)))))),
+          CallExpression(Identifier, ArgList(Identifier)),
+          CallExpression(Identifier, ArgList(Identifier)))))),
   CallExpression(
     Identifier,
-    Arguments(
+    ArgList(
       ClosureExpression(
-        ClosureParameters,
+        ParamList,
         TypeIdentifier,
         Block(Identifier)))))
 
@@ -694,9 +690,9 @@ a.map(|b: usize| b.push(c));
 SourceFile(
   CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
-    Arguments(ClosureExpression(
-      ClosureParameters(Parameter(Identifier, TypeIdentifier)),
-      CallExpression(FieldExpression(Identifier, FieldIdentifier), Arguments(Identifier))))))
+    ArgList(ClosureExpression(
+      ParamList(Parameter(Identifier, TypeIdentifier)),
+      CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList(Identifier))))))
 
 
 # Unsafe blocks
@@ -709,4 +705,4 @@ SourceFile(
   ConstItem(const,
     Identifier,
     TypeIdentifier,
-    UnsafeBlock(unsafe, Block(CallExpression(Identifier, Arguments)))))
+    UnsafeBlock(unsafe, Block(CallExpression(Identifier, ArgList)))))
