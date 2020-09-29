@@ -504,7 +504,7 @@ literalPattern {
 boolean { @specialize[name=Boolean]<identifier, "true" | "false"> }
 
 @skip {} {
-  BlockComment { "/*" (BlockComment | blockCommentContent)* "*/" }
+  BlockComment { "/*" (BlockComment | blockCommentContent)* blockCommentEnd }
 
   String { stringStart (Escape | stringContent)* stringEnd }
 }
@@ -561,11 +561,17 @@ tpOpen[name="<"] { "<" }
 
   LineComment { "//" ![\n]* }
 
+  @precedence { LineComment, "/" }
+
   blockCommentContent { ![*/] blockCommentContent? | "*" blockCommentStar | "/" blockCommentSlash }
   blockCommentStar { ![/*] blockCommentContent | "*" blockCommentStar }
   blockCommentSlash { ![/*] blockCommentContent | "/" blockCommentSlash }
 
-  @precedence { LineComment, "/" }
+  blockCommentEnd { ![*/] blockCommentEnd | "*" blockCommentEndStar | "/" blockCommentEndSlash }
+  blockCommentEndStar { "/" | ![/*] blockCommentEnd | "*" blockCommentEndStar }
+  blockCommentEndSlash { ![/*] blockCommentEnd | "/" blockCommentSlash }
+
+  @precedence { blockCommentEnd, blockCommentContent }
 
   stringStart { "b"? '"' }
   stringContent { !["\\\n]* "\n" | !["\\\n]+ }

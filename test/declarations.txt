@@ -1279,3 +1279,14 @@ SourceFile(
   FunctionItem(Vis(crate), fn, BoundIdentifier, ParamList, Block),
   ConstItem(Vis(crate), const,
     BoundIdentifier, TypeIdentifier, Integer))
+
+# Greek letters in identifiers
+
+const σ1 : Σ = 0;
+const ψ_2 : Ψ = 1;
+
+==>
+
+SourceFile(
+  ConstItem(const,BoundIdentifier, TypeIdentifier, Integer),
+  ConstItem(const,BoundIdentifier, TypeIdentifier, Integer))
