@@ -5,7 +5,9 @@
   call
   params
   macroRules
+  macroSemi
   macro
+  unary
   mult @left
   add @left
   shift @left
@@ -52,7 +54,7 @@ declarationStatement {
   ConstItem {
     Vis? kw<"const"> BoundIdentifier ":" type ("=" expression)? ";"
   } |
-  MacroInvocation !statement |
+  MacroInvocationSemi |
   MacroDefinition {
     ckw<"macro_rules"> !macroRules "!" Identifier (
       MacroRules { "(" (MacroRule ";")* MacroRule? ")" } ";" |
@@ -90,7 +92,7 @@ declarationStatement {
   } |
   ImplItem {
     kw<"unsafe">? kw<"impl"> TypeParamList?
-    ("!"? typePath kw<"for">)? type
+    ("!"? type kw<"for">)? type
     WhereClause? DeclarationList
   } |
   TraitItem {
@@ -114,13 +116,13 @@ declarationStatement {
 }
 
 MacroRule {
-  tokenTree "=>" BracketedTokens
+  tokenTree "=>" (ParenthesizedTokens | BracketedTokens | BracedTokens)
 }
 
 tokenTree {
-  BracketedTokens |
+  ParenthesizedTokens | BracketedTokens | BracedTokens |
   TokenBindingPattern {
-    Metavariable !bind ":" Identifier
+    Metavariable !bind ":" tokenIdentifier
   } |
   TokenRepetitionPattern {
     "$" "(" tokenTree* ")" ("+" | "*" | "?")
@@ -129,19 +131,17 @@ tokenTree {
   RawString |
   Char |
   Integer |
-  Float
+  Float |
   tokenIdentifier |
   Metavariable |
   // FIXME all ops
   UpdateOp | CompareOp | CompareOp { "<" } |
-  "." | ";" | ":" | "=" | "+" | "*" | "&" | "->" | ".." | "..." | "&" | "::" | "!" | "#"
+  "." | "," | ";" | ":" | "=" | "+" | "*" | "&" | "->" | ".." | "..." | "&" | "::" | "!" | "#"
 }
 
-BracketedTokens {
-  "(" tokenTree* ")" |
-  "[" tokenTree* "]" |
-  "{" tokenTree* "}"
-}
+ParenthesizedTokens { "(" tokenTree* ")" }
+BracketedTokens { "[" tokenTree* "]" }
+BracedTokens { "{" tokenTree* "}" }
 
 Attribute {
   "#" "[" MetaItem "]"
@@ -223,7 +223,7 @@ OptionalTypeParameter {
 }
 
 useClause {
-  BoundIdentifier |
+  pathIdent<BoundIdentifier> |
   ScopedIdentifier { simplePathPrefix BoundIdentifier } |
   UseAsClause { simplePath kw<"as"> BoundIdentifier } |
   UseList |
@@ -266,7 +266,7 @@ type {
   UnitType { "(" ")" } |
   ArrayType { "[" type (";" expression)? "]" } |
   FunctionType |
-  MacroInvocation { typePath !macro "!" BracketedTokens } |
+  MacroInvocation { typePath !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens) } |
   EmptyType { "!" } |
   DynamicType { kw<"dyn"> (typePath | GenericType | FunctionType) } |
   BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime }
@@ -295,7 +295,7 @@ TypeBinding {
 expression { blockExpression | nonBlockExpression }
 
 nonBlockExpression {
-  UnaryExpression { ("-" | "*" | "!") expression } |
+  UnaryExpression { ("-" | "*" | "!") !unary expression } |
   ReferenceExpression { "&" kw<"mut">? expression } |
   TryExpression { expression !try "?" } |
   BinaryExpression |
@@ -343,7 +343,11 @@ blockExpression {
 }
 
 MacroInvocation {
-  path !macro "!" BracketedTokens
+  path !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens)
+}
+
+MacroInvocationSemi[name=MacroInvocation] {
+  path !macro "!" ((ParenthesizedTokens | BracketedTokens) !macroSemi ";" | BracedTokens !macroSemi)
 }
 
 QualifiedScope { tpOpen type (kw<"as"> type)? tpClose }

@@ -87,6 +87,7 @@ SourceFile(
       ReturnExpression(return,
         BinaryExpression(
           Identifier,
+          ArithOp,
           Identifier)))),
   FunctionItem(fn,
     BoundIdentifier,
@@ -98,7 +99,7 @@ SourceFile(
     Block(
       MacroInvocation(
         Identifier,
-        BracketedTokens(
+        ParenthesizedTokens(
           String,
           Identifier)))),
   FunctionItem(fn,
@@ -127,13 +128,14 @@ SourceFile(
     BoundIdentifier,
     ParamList,
     Block(
-      ReturnExpression)),
+      ReturnExpression(return))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList(
       Parameter(
         BoundIdentifier,
         AbstractType(
+          impl,
           FunctionType(
             TypeIdentifier,
             ParamList,
@@ -287,20 +289,18 @@ SourceFile(
         BoundIdentifier))),
   UseDeclaration(use,
     UseWildcard(
-      ScopedIdentifier(
-        ScopeIdentifier,
-        ScopeIdentifier,
-        ScopeIdentifier))),
+      ScopeIdentifier,
+      ScopeIdentifier,
+      ScopeIdentifier)),
   UseDeclaration(Vis(pub), use,
     ScopedIdentifier(
       self,
       ScopeIdentifier,
-      Identifier)),
+      BoundIdentifier)),
   UseDeclaration(use,
     ScopedUseList(
-      ScopedIdentifier(
-        ScopeIdentifier,
-        Identifier),
+      ScopeIdentifier,
+      ScopeIdentifier,
       UseList(
         self,
         UseAsClause(
@@ -309,7 +309,8 @@ SourceFile(
           BoundIdentifier),
         UseAsClause(
           Identifier,
-          Identifier)))),
+          as,
+          BoundIdentifier)))),
   UseDeclaration(use,
     ScopedUseList(
       ScopeIdentifier,
@@ -693,6 +694,8 @@ SourceFile(
 
 # Attributes
 
+#![allow(clippy::useless_transmute)]
+
 #[test]
 fn test_foo() {}
 
@@ -703,56 +706,53 @@ struct Baz;
 struct Foo;
 
 #[cfg(target_os = "macos")]
-mod macos_only {}
-
-#![allow(clippy::useless_transmute)]
-
 #[clippy::cyclomatic_complexity = "100"]
+mod macos_only {}
 
 ==>
 
 SourceFile(
-  Attribute(MetaItem(Identifier)),
-  FunctionItem(fn,
-    BoundIdentifier,
-    ParamList,
-    Block),
-
-  Attribute(MetaItem(
-    BoundIdentifier,
-    MetaArguments(MetaItem(Identifier)))),
-  StructItem(struct,TypeIdentifier),
-
-  Attribute(MetaItem(
-    Identifier,
-    MetaArguments(
-      MetaItem(Identifier),
-      MetaItem(Identifier)))),
-  StructItem(struct,TypeIdentifier),
-
-  Attribute(MetaItem(
-    Identifier,
-    MetaArguments(
-      MetaItem(
-        Identifier,
-        String)))),
-  ModItem(mod,
-    BoundIdentifier,
-    DeclarationList),
-
   InnerAttribute(MetaItem(
     Identifier,
-    MetaArguments(MetaItem(
+    MetaItem(
       ScopedIdentifier(
-        Identifier,
-        Identifier))))),
+        ScopeIdentifier,
+        Identifier)))),
 
-  Attribute(MetaItem(
-    ScopedIdentifier(
+  AttributeItem(
+    Attribute(MetaItem(Identifier)),
+    FunctionItem(fn,
+      BoundIdentifier,
+      ParamList,
+      Block)),
+
+  AttributeItem(
+    Attribute(MetaItem(
       Identifier,
-      Identifier),
-    String)))
+      MetaItem(Identifier))),
+    StructItem(struct,TypeIdentifier)),
 
+  AttributeItem(
+    Attribute(MetaItem(
+      Identifier,
+      MetaItem(Identifier),
+      MetaItem(Identifier))),
+   StructItem(struct,TypeIdentifier)),
+
+  AttributeItem(
+    Attribute(MetaItem(
+      Identifier,
+      MetaItem(
+        Identifier,
+        String))),
+    Attribute(MetaItem(
+      ScopedIdentifier(
+        ScopeIdentifier,
+        Identifier),
+      String)),
+    ModItem(mod,
+      BoundIdentifier,
+      DeclarationList)))
 
 # Inner attributes
 
@@ -778,8 +778,8 @@ fn foo() {
    bar(x,
        #[cfg(foo = "bar")]
        y);
-   let z = [#[hello] 2, 7, 8];
-   let t = (#[hello] 2, 7, 8);
+   let z = [#![hello] 2, 7, 8];
+   let t = (#![hello] 2, 7, 8);
 }
 
 ==>
@@ -795,21 +795,21 @@ SourceFile(
           Identifier,
             Attribute(MetaItem(
               Identifier,
-              MetaArguments(MetaItem(
+              MetaItem(
                 Identifier,
-                String)))),
+                String))),
             Identifier)),
       LetDeclaration(let,
         BoundIdentifier,
         ArrayExpression(
-          Attribute(MetaItem(Identifier)),
+          InnerAttribute(MetaItem(Identifier)),
           Integer,
           Integer,
           Integer)),
       LetDeclaration(let,
         BoundIdentifier,
         TupleExpression(
-          Attribute(MetaItem(Identifier)),
+          InnerAttribute(MetaItem(Identifier)),
           Integer,
           Integer,
           Integer)))))
@@ -891,11 +891,12 @@ SourceFile(
   ImplItem(impl,
     TypeParamList(Lifetime),
     ScopedTypeIdentifier(
-      Identifier,
+      ScopeIdentifier,
       TypeIdentifier),
+    for,
     GenericType(
       ScopedTypeIdentifier(
-        Identifier,
+        ScopeIdentifier,
         TypeIdentifier),
       TypeArgList(Lifetime)),
     DeclarationList),
@@ -903,6 +904,7 @@ SourceFile(
     GenericType(
       TypeIdentifier,
       TypeArgList(TypeIdentifier)),
+    for,
     TypeIdentifier,
     DeclarationList(
       FunctionItem(fn,
@@ -912,6 +914,7 @@ SourceFile(
         Block(
           TypeCastExpression(
             UnaryExpression(self),
+            as,
             TypeIdentifier))))))
 
 
@@ -1027,7 +1030,7 @@ SourceFile(
     TypeIdentifier,
     TraitBounds(TypeIdentifier, TypeIdentifier, TypeIdentifier),
     DeclarationList(
-      MacroInvocation(Identifier, BracketedTokens),
+      MacroInvocation(Identifier, BracedTokens),
       FunctionItem(fn, BoundIdentifier, ParamList(SelfParameter(self))))))
 
 

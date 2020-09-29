@@ -420,7 +420,7 @@ SourceFile(
       MatchArm(
         MacroInvocation(
           Identifier,
-          BracketedTokens(
+          ParenthesizedTokens(
             Integer)),
         String),
       MatchArm(_, String))),
