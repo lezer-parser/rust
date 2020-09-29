@@ -1,0 +1,135 @@
+# Integer literals
+
+0;
+0___0;
+123;
+0usize;
+123i32;
+123u32;
+123_u32;
+0xff_u8;
+0o70_i16;
+0b1111_1111_1001_0000_i32;
+1u128;
+
+==>
+
+SourceFile(
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer,
+  Integer)
+
+
+# Floating-point literals
+
+123.123;
+2.;
+123.0f64;
+0.1f64;
+0.1f32;
+12E+99_f64;
+
+==>
+
+SourceFile(
+  Float,
+  Float,
+  Float,
+  Float,
+  Float,
+  Float)
+
+
+# String literals
+
+"";
+"abc";
+b"foo\nbar";
+"foo\
+    bar";
+"\"foo\"";
+"/* foo bar */ foo bar";
+"foo\x42\x43bar";
+"foo \x42  \x43 bar";
+
+==>
+
+SourceFile(
+  String,
+  String,
+  String(Escape),
+  String(Escape),
+  String(Escape, Escape),
+  String,
+  String(Escape, Escape),
+  String(Escape, Escape))
+
+
+# Raw string literals
+
+r#"abc"#; r##"ok"##;
+r##"foo #"# bar"##;
+r###"foo ##"## bar"###;
+r######"foo ##### bar"######;
+
+==>
+
+SourceFile(
+  RawString,
+  RawString,
+  RawString,
+  RawString,
+  RawString)
+
+
+# Raw byte string literals
+
+br#"abc"#;
+br##"abc"##;
+
+==>
+
+SourceFile(
+  RawString,
+  RawString)
+
+
+# Character literals
+
+'a';
+'\'';
+'\0';
+b'x';
+'\t';
+'\xff';
+'\\';
+
+==>
+
+SourceFile(
+  Char,
+  Char,
+  Char,
+  Char,
+  Char,
+  Char,
+  Char)
+
+
+# Boolean literals
+
+true;
+false;
+
+==>
+
+SourceFile(Boolean, Boolean)
+

@@ -36,23 +36,26 @@ export const tokens = new ExternalTokenizer((input, token, stack) => {
     }
     if (isFloat) token.accept(Float, pos)
   } else if (next == _b || next == _r) {
-    if (next == _b) next = input.read(++pos)
+    if (next == _b) next = input.get(++pos)
     if (next != _r) return
-    next = input.read(++pos)
+    next = input.get(++pos)
     let count = 0
-    while (next == Hash) { count++; next = input.read(++pos) }
+    while (next == Hash) { count++; next = input.get(++pos) }
     if (next != Quote) return
-    next = input.read(++pos)
-    for (let stop = false; !stop;) {
+    next = input.get(++pos)
+    content: for (;;) {
       if (next < 0) return
-      stop = next == Quote
-      next = input.read(++pos)
+      let isQuote = next == Quote
+      next = input.get(++pos)
+      if (isQuote) {
+        for (let i = 0; i < count; i++) {
+          if (next != Hash) continue content
+          next = input.get(++pos)    
+        }
+        token.accept(RawString, pos)
+        return
+      }
     }
-    for (let i = 0; i < count; i++) {
-      if (next != Hash) return
-      next = input.read(++pos)
-    }
-    token.accept(RawString, pos)
   } else if (next == Pipe && stack.canShift(closureParamDelim)) {
     token.accept(closureParamDelim, pos + 1)
   }
