@@ -57,8 +57,8 @@ declarationStatement {
   MacroInvocationSemi |
   MacroDefinition {
     ckw<"macro_rules"> !macroRules "!" Identifier (
-      MacroRules { "(" (MacroRule ";")* MacroRule? ")" } ";" |
-      MacroRules { "{" (MacroRule ";")* MacroRule? "}" }
+      "(" (MacroRule ";")* MacroRule? ")" ";" |
+      "{" (MacroRule ";")* MacroRule? "}"
     )
   } |
   EmptyStatement { ";" } |
@@ -121,22 +121,31 @@ MacroRule {
 
 tokenTree {
   ParenthesizedTokens | BracketedTokens | BracedTokens |
-  TokenBindingPattern {
+  TokenBinding {
     Metavariable !bind ":" tokenIdentifier
   } |
-  TokenRepetitionPattern {
-    "$" "(" tokenTree* ")" ("+" | "*" | "?")
+  TokenRepetition {
+    "$" "(" tokenTree* ")" separatorToken? ("+" | "*" | "?")
   } |
+  ArithOp { "*" | "+" } |
+  "?" |
+  separatorToken
+}
+
+separatorToken {
   String |
   RawString |
   Char |
   Integer |
   Float |
   tokenIdentifier |
+  Lifetime |
   Metavariable |
-  // FIXME all ops
+  ArithOp { "-" | "/" } |
+  BitOp { "<<" | ">>" | "&" | "|" | "^" } |
+  LogicOp { "||" | "&&" } |
   UpdateOp | CompareOp | CompareOp { "<" } |
-  "." | "," | ";" | ":" | "=" | "+" | "*" | "&" | "->" | ".." | "..." | "&" | "::" | "!" | "#"
+  "." | "," | ";" | ":" | "=" | "->" | "=>" | ".." | "..." | "::" | "#" | "!"
 }
 
 ParenthesizedTokens { "(" tokenTree* ")" }
@@ -295,7 +304,7 @@ TypeBinding {
 expression { blockExpression | nonBlockExpression }
 
 nonBlockExpression {
-  UnaryExpression { ("-" | "*" | "!") !unary expression } |
+  UnaryExpression { (ArithOp { "-" } | DerefOp { "*" } | LogicOp { "!" }) !unary expression } |
   ReferenceExpression { "&" kw<"mut">? expression } |
   TryExpression { expression !try "?" } |
   BinaryExpression |

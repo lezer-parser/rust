@@ -913,7 +913,7 @@ SourceFile(
         TypeIdentifier,
         Block(
           TypeCastExpression(
-            UnaryExpression(self),
+            UnaryExpression(DerefOp, self),
             as,
             TypeIdentifier))))))
 

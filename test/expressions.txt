@@ -39,9 +39,9 @@ SourceFile(
 ==>
 
 SourceFile(
-  UnaryExpression(Identifier),
-  UnaryExpression(Identifier),
-  UnaryExpression(Identifier))
+  UnaryExpression(ArithOp, Identifier),
+  UnaryExpression(LogicOp, Identifier),
+  UnaryExpression(DerefOp, Identifier))
 
 
 # Reference expressions
@@ -468,7 +468,7 @@ while !done {
 
 SourceFile(
   WhileExpression(while,
-    UnaryExpression(Identifier),
+    UnaryExpression(LogicOp, Identifier),
     Block(
       AssignmentExpression(
         Identifier,
