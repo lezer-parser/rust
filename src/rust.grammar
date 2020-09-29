@@ -453,9 +453,7 @@ cond {
 Guard { kw<"if"> expression }
 
 MatchArm<after> {
-  Attribute*
-  (MacroInvocation | pattern) ("|" (MacroInvocation | pattern))*
-  Guard?
+  Attribute* pattern Guard?
   "=>" (nonBlockExpression after | !block blockExpression)
 }
 
@@ -473,18 +471,20 @@ pattern {
     structName
     FieldPatternList { "{" commaSep<FieldPattern | ".."> "}" }
   } |
-  RefPattern { kw<"ref"> pattern } |
+  RefPattern { kw<"ref"> !unary pattern } |
   SlicePattern { "[" commaSep<pattern> "]" } |
   CapturedPattern { BoundIdentifier "@" pattern } |
-  ReferencePattern { "&" !mut kw<"mut">? pattern } |
+  ReferencePattern { "&" !unary (!mut kw<"mut">)? pattern } |
   ".." |
-  MutPattern { kw<"mut"> pattern } |
+  MutPattern { kw<"mut"> !unary pattern } |
   RangePattern { (literalPattern | path) ("..." | "..=") (literalPattern | path) } |
+  OrPattern { pattern !or "|" pattern } |
+  MacroInvocation |
   kw<"_">
 }
 
 FieldPattern {
-  kw<"ref">? (!mut kw<"mut">)? (Identifier | FieldIdentifier ":" pattern)
+  kw<"ref">? (!mut kw<"mut">)? (BoundIdentifier | FieldIdentifier ":" pattern)
 }
 
 literal {

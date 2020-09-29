@@ -430,9 +430,7 @@ SourceFile(
       Identifier,
       MatchBlock(
         MatchArm(
-          Integer,
-          Integer,
-          Integer,
+          OrPattern(OrPattern(Integer, Integer), Integer),
           String),
         MatchArm(
           BoundIdentifier,
