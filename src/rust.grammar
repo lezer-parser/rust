@@ -1,6 +1,8 @@
 @precedence {
   preferGenerics
   try
+  implFor
+  implBang
   deref
   call
   params
@@ -92,7 +94,7 @@ declarationStatement {
   } |
   ImplItem {
     kw<"unsafe">? kw<"impl"> TypeParamList?
-    ("!"? type kw<"for">)? type
+    ((!implBang "!")? type !implFor kw<"for">)? type
     WhereClause? DeclarationList
   } |
   TraitItem {
@@ -144,7 +146,7 @@ separatorToken {
   ArithOp { "-" | "/" } |
   BitOp { "<<" | ">>" | "&" | "|" | "^" } |
   LogicOp { "||" | "&&" } |
-  UpdateOp | CompareOp | CompareOp { "<" } |
+  UpdateOp | CompareOp |
   "." | "," | ";" | ":" | "=" | "->" | "=>" | ".." | "..." | "::" | "#" | "!"
 }
 
@@ -208,15 +210,17 @@ RemovedTraitBound {
   "?" type
 }
 
+typeParam[inline] {
+  Lifetime |
+  Metavariable |
+  TypeIdentifier |
+  ConstrainedTypeParameter |
+  OptionalTypeParameter |
+  ConstParameter
+}
+
 TypeParamList {
-  tpOpen commaSep<(
-    Lifetime |
-    Metavariable |
-    TypeIdentifier |
-    ConstrainedTypeParameter |
-    OptionalTypeParameter |
-    ConstParameter
-  ) !preferGenerics> tpClose
+  tpOpen !preferGenerics (typeParam !preferGenerics ("," typeParam? !preferGenerics)*)? tpClose
 }
 
 ConstParameter {
@@ -282,6 +286,7 @@ type {
 }
 
 FunctionType {
+  ForLifetimes { kw<"for"> tpOpen commaSep<Lifetime> tpClose }?
   (typePath | functionModifier* kw<"fn">)
   !params ParamList {
     "(" commaSep<Attribute* SelfParameter | VariadicParameter { "..." } | kw<"_"> | Parameter { type }> ")"
@@ -422,7 +427,7 @@ BinaryExpression {
   expression !bitAnd BitOp { "&" } expression |
   expression !bitXor BitOp { "^" } expression |
   expression !bitOr BitOp { "|" } expression |
-  expression !compare (CompareOp | CompareOp { "<" }) expression |
+  expression !compare CompareOp expression |
   expression !and LogicOp { "&&" } expression |
   expression !or LogicOp { "||" } expression
 }
@@ -533,18 +538,18 @@ commaSep1<expr> { expr ("," expr?)* }
 
 plusSep<expr> { expr (!plusSep "+" expr)* }
 
-@external tokens tokens from "./tokens" { RawString, Float, closureParamDelim[name="|"] }
+@external tokens closureParam from "./tokens" { closureParamDelim[name="|"] }
 
-tpOpen[name="<"] { "<" }
+@external tokens tpDelim from "./tokens" { tpOpen[name="<"], tpClose[name=">"] }
+
+@external tokens literalTokens from "./tokens" { RawString, Float }
 
 @tokens {
   whitespace { $[ \t\r\n] }
 
   UpdateOp { ($[+\-*/%^&|] | "<<" | ">>") "=" }
 
-  CompareOp { ">" "="? | "<=" | $[!=] "=" }
-
-  tpClose[name=">"] { ">" }
+  CompareOp { $[<>] "="? | $[!=] "=" }
 
   Integer {
     ($[0-9] $[0-9_]* |
@@ -589,7 +594,7 @@ tpOpen[name="<"] { "<" }
   @precedence { Metavariable, "$" }
 
   "[" "]" "{" "}" "(" ")"
-  ";" ":" "::" "," ">"
+  ";" ":" "::" ","
   "=" "->" ".." "..." "&"
 }
 

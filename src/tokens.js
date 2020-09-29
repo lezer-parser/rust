@@ -1,13 +1,13 @@
 import {ExternalTokenizer} from "lezer"
-import {Float, RawString, closureParamDelim} from "./parser.terms"
+import {Float, RawString, closureParamDelim, tpOpen, tpClose} from "./parser.terms"
 
 const _b = 98, _e = 101, _f = 102, _r = 114, _E = 69,
-  Dot = 46, Plus = 43, Minus = 45, Hash = 35, Quote = 34, Pipe = 124
+  Dot = 46, Plus = 43, Minus = 45, Hash = 35, Quote = 34, Pipe = 124, LessThan = 60, GreaterThan = 62
 
 function isNum(ch) { return ch >= 48 && ch <= 57 }
 function isNum_(ch) { return isNum(ch) || ch == 95 }
 
-export const tokens = new ExternalTokenizer((input, token, stack) => {
+export const literalTokens = new ExternalTokenizer((input, token, stack) => {
   let pos = token.start, next = input.get(pos)
   if (isNum(next)) {
     let isFloat = false
@@ -56,7 +56,15 @@ export const tokens = new ExternalTokenizer((input, token, stack) => {
         return
       }
     }
-  } else if (next == Pipe && stack.canShift(closureParamDelim)) {
-    token.accept(closureParamDelim, pos + 1)
   }
+})
+
+export const closureParam = new ExternalTokenizer((input, token) => {
+  if (input.get(token.start) == Pipe) token.accept(closureParamDelim, token.start + 1)
+})
+
+export const tpDelim = new ExternalTokenizer((input, token) => {
+  let pos = token.start, next = input.get(pos)
+  if (next == LessThan) token.accept(tpOpen, pos + 1)
+  else if (next == GreaterThan) token.accept(tpClose, pos + 1)
 })
