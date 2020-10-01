@@ -1,3 +1,11 @@
+## 0.11.1 (2020-10-01)
+
+### New features
+
+Expression statements are now wrapped in an `ExpressionStatement` node.
+
+The package now provides TypeScript type definitions.
+
 ## 0.11.0 (2020-09-29)
 
 ### Breaking changes
