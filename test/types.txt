@@ -139,14 +139,14 @@ SourceFile(
       Parameter(BoundIdentifier, TypeIdentifier),
       Parameter(BoundIdentifier, FunctionType(fn, ParamList(Parameter(TypeIdentifier)), TypeIdentifier))),
     TypeIdentifier,
-    Block(CallExpression(Identifier, ArgList(Identifier)))),
+    Block(ExpressionStatement(CallExpression(Identifier, ArgList(Identifier))))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList(
       Parameter(BoundIdentifier, TypeIdentifier),
       Parameter(BoundIdentifier,
         ReferenceType(FunctionType(TypeIdentifier, ParamList(Parameter(TypeIdentifier)), TypeIdentifier)))),
-    TypeIdentifier, Block(CallExpression(Identifier, ArgList(Identifier)))),
+    TypeIdentifier, Block(ExpressionStatement(CallExpression(Identifier, ArgList(Identifier))))),
   TypeItem(type,
     TypeIdentifier,
     FunctionType(
@@ -215,11 +215,11 @@ d as *mut E<<F as E>::G>;
 ==>
 
 SourceFile(
-  TypeCastExpression(
+  ExpressionStatement(TypeCastExpression(
     Identifier,
     as,
-    GenericType(TypeIdentifier, TypeArgList(TypeIdentifier))),
-  TypeCastExpression(
+    GenericType(TypeIdentifier, TypeArgList(TypeIdentifier)))),
+  ExpressionStatement(TypeCastExpression(
     Identifier,
     as,
     PointerType(
@@ -228,4 +228,4 @@ SourceFile(
         TypeIdentifier,
         TypeArgList(
           ScopedTypeIdentifier(
-            QualifiedScope(TypeIdentifier,as,TypeIdentifier), TypeIdentifier))))))
+            QualifiedScope(TypeIdentifier,as,TypeIdentifier), TypeIdentifier)))))))

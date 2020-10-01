@@ -84,11 +84,11 @@ SourceFile(
         TypeIdentifier)),
     TypeIdentifier,
     Block(
-      ReturnExpression(return,
+      ExpressionStatement(ReturnExpression(return,
         BinaryExpression(
           Identifier,
           ArithOp,
-          Identifier)))),
+          Identifier))))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList(
@@ -109,10 +109,10 @@ SourceFile(
       TypeIdentifier,
       Integer),
     Block(
-      ReturnExpression(return,
+      ExpressionStatement(ReturnExpression(return,
         ArrayExpression(
           Integer,
-          Integer)))),
+          Integer))))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList,
@@ -120,15 +120,15 @@ SourceFile(
       TypeIdentifier,
       TypeIdentifier),
     Block(
-      ReturnExpression(return,
+      ExpressionStatement(ReturnExpression(return,
         TupleExpression(
           Integer,
-          Integer)))),
+          Integer))))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList,
     Block(
-      ReturnExpression(return))),
+      ExpressionStatement(ReturnExpression(return)))),
   FunctionItem(fn,
     BoundIdentifier,
     ParamList(
@@ -172,9 +172,9 @@ SourceFile(
       TypeIdentifier,
       TypeArgList(
         Block(
-          ScopedIdentifier(
+          ExpressionStatement(ScopedIdentifier(
             ScopeIdentifier,
-            Identifier)))),
+            Identifier))))),
     Block))
 
 
@@ -789,7 +789,7 @@ SourceFile(
     BoundIdentifier,
     ParamList,
     Block(
-      CallExpression(
+      ExpressionStatement(CallExpression(
         Identifier,
         ArgList(
           Identifier,
@@ -798,7 +798,7 @@ SourceFile(
               MetaItem(
                 Identifier,
                 String))),
-            Identifier)),
+            Identifier))),
       LetDeclaration(let,
         BoundIdentifier,
         ArrayExpression(
@@ -870,9 +870,9 @@ SourceFile(
       TypeIdentifier,
       TypeArgList(
         Block(
-          ScopedIdentifier(
+          ExpressionStatement(ScopedIdentifier(
             ScopeIdentifier,
-            Identifier)))),
+            Identifier))))),
     DeclarationList))
 
 
@@ -912,10 +912,10 @@ SourceFile(
         ParamList(SelfParameter(self)),
         TypeIdentifier,
         Block(
-          TypeCastExpression(
+          ExpressionStatement(TypeCastExpression(
             UnaryExpression(DerefOp, self),
             as,
-            TypeIdentifier))))))
+            TypeIdentifier)))))))
 
 
 # Unsafe impls
@@ -947,9 +947,9 @@ SourceFile(
       TypeIdentifier,
       Block(
         LineComment,
-        CallExpression(
+        ExpressionStatement(CallExpression(
           FieldExpression(Identifier, FieldIdentifier),
-          ArgList))))))
+          ArgList)))))))
 
 
 # Trait declarations
@@ -1156,7 +1156,7 @@ SourceFile(
       TypeIdentifier,
       TraitBounds(FunctionType(TypeIdentifier,ParamList(
         Parameter(ReferenceType(TypeIdentifier))),TypeIdentifier)))),
-    Block(ReturnExpression(return,Boolean))),
+    Block(ExpressionStatement(ReturnExpression(return,Boolean)))),
 
   ImplItem(impl,
     TypeParamList(

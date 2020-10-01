@@ -28,21 +28,21 @@ futures.await?.function().await?;
 ==>
 
 SourceFile(
-  AwaitExpression(Identifier, await),
-  TryExpression(
-    AwaitExpression(Identifier, await)),
-  TryExpression(
+  ExpressionStatement(AwaitExpression(Identifier, await)),
+  ExpressionStatement(TryExpression(
+    AwaitExpression(Identifier, await))),
+  ExpressionStatement(TryExpression(
     AwaitExpression(
       TryExpression(
-        AwaitExpression(Identifier, await)), await)),
-  TryExpression(
+        AwaitExpression(Identifier, await)), await))),
+  ExpressionStatement(TryExpression(
     AwaitExpression(
       CallExpression(
         FieldExpression(
           TryExpression(
             AwaitExpression(Identifier, await)),
           FieldIdentifier),
-        ArgList), await)))
+        ArgList), await))))
 
 
 # Async Block
@@ -54,12 +54,6 @@ async move {}
 ==>
 
 SourceFile(
-  AsyncBlock(async,
-    Block),
-  AsyncBlock(async,
-    Block(
-      LetDeclaration(let,
-        BoundIdentifier,
-        Integer))),
-  AsyncBlock(async, move, Block))
-
+  ExpressionStatement(AsyncBlock(async, Block)),
+  ExpressionStatement(AsyncBlock(async, Block(LetDeclaration(let, BoundIdentifier, Integer)))),
+  ExpressionStatement(AsyncBlock(async, move, Block)))

@@ -8,7 +8,7 @@ fn main() {
 
 SourceFile(
   FunctionItem(fn,BoundIdentifier, ParamList, Block(
-    Identifier)))
+    ExpressionStatement(Identifier))))
 
 
 # Raw identifiers
@@ -24,10 +24,10 @@ SourceFile(
     BoundIdentifier,
     ParamList,
     Block(
-      FieldExpression(
+      ExpressionStatement(FieldExpression(
         ParenthesizedExpression(
           TypeCastExpression(Identifier, as, TypeIdentifier)),
-        FieldIdentifier))))
+        FieldIdentifier)))))
 
 
 # Unary operator expressions
@@ -39,9 +39,9 @@ SourceFile(
 ==>
 
 SourceFile(
-  UnaryExpression(ArithOp, Identifier),
-  UnaryExpression(LogicOp, Identifier),
-  UnaryExpression(DerefOp, Identifier))
+  ExpressionStatement(UnaryExpression(ArithOp, Identifier)),
+  ExpressionStatement(UnaryExpression(LogicOp, Identifier)),
+  ExpressionStatement(UnaryExpression(DerefOp, Identifier)))
 
 
 # Reference expressions
@@ -52,9 +52,8 @@ SourceFile(
 ==>
 
 SourceFile(
-  ReferenceExpression(Identifier),
-  ReferenceExpression(mut, FieldExpression(self, FieldIdentifier)))
-
+  ExpressionStatement(ReferenceExpression(Identifier)),
+  ExpressionStatement(ReferenceExpression(mut, FieldExpression(self, FieldIdentifier))))
 
 # Try expressions
 
@@ -63,8 +62,7 @@ a.unwrap()?;
 ==>
 
 SourceFile(
-  TryExpression(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList)))
-
+  ExpressionStatement(TryExpression(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList))))
 
 # Binary operator expressions
 
@@ -82,17 +80,16 @@ a || b;
 ==>
 
 SourceFile(
-  BinaryExpression(Identifier, ArithOp, Identifier),
-  BinaryExpression(Identifier, ArithOp, Identifier),
-  BinaryExpression(Identifier, ArithOp, Identifier),
-  BinaryExpression(Identifier, ArithOp, Identifier),
-  BinaryExpression(Identifier, ArithOp, Identifier),
-  BinaryExpression(Identifier, BitOp, Identifier),
-  BinaryExpression(Identifier, BitOp, Identifier),
-  BinaryExpression(Identifier, CompareOp, Identifier),
-  BinaryExpression(Identifier, LogicOp, Identifier),
-  BinaryExpression(Identifier, LogicOp, Identifier))
-
+  ExpressionStatement(BinaryExpression(Identifier, ArithOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, ArithOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, ArithOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, ArithOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, ArithOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, BitOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, BitOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, CompareOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, LogicOp, Identifier)),
+  ExpressionStatement(BinaryExpression(Identifier, LogicOp, Identifier)))
 
 # Grouped expressions
 
@@ -102,11 +99,11 @@ SourceFile(
 ==>
 
 SourceFile(
-  ParenthesizedExpression(Integer),
-  ParenthesizedExpression(BinaryExpression(
+  ExpressionStatement(ParenthesizedExpression(Integer)),
+  ExpressionStatement(ParenthesizedExpression(BinaryExpression(
     Integer,
     ArithOp,
-    ParenthesizedExpression(BinaryExpression(Integer, ArithOp, Integer)))))
+    ParenthesizedExpression(BinaryExpression(Integer, ArithOp, Integer))))))
 
 
 # Range expressions
@@ -121,12 +118,12 @@ a..b;
 ==>
 
 SourceFile(
-  RangeExpression(Integer, Integer),
-  RangeExpression(Integer),
-  RangeExpression(Integer),
-  RangeExpression,
-  RangeExpression(Integer, Identifier),
-  RangeExpression(Identifier, Identifier))
+  ExpressionStatement(RangeExpression(Integer, Integer)),
+  ExpressionStatement(RangeExpression(Integer)),
+  ExpressionStatement(RangeExpression(Integer)),
+  ExpressionStatement(RangeExpression),
+  ExpressionStatement(RangeExpression(Integer, Identifier)),
+  ExpressionStatement(RangeExpression(Identifier, Identifier)))
 
 
 # Assignment expressions
@@ -136,9 +133,9 @@ x = y;
 ==>
 
 SourceFile(
-  AssignmentExpression(
+  ExpressionStatement(AssignmentExpression(
     Identifier,
-    Identifier))
+    Identifier)))
 
 
 # Compound assignment expressions
@@ -149,8 +146,8 @@ x += y;
 ==>
 
 SourceFile(
-  AssignmentExpression(Identifier, UpdateOp, Integer),
-  AssignmentExpression(Identifier, UpdateOp, Identifier))
+  ExpressionStatement(AssignmentExpression(Identifier, UpdateOp, Integer)),
+  ExpressionStatement(AssignmentExpression(Identifier, UpdateOp, Identifier)))
 
 
 # Type cast expressions
@@ -162,10 +159,10 @@ let size: f64 = len(values) as f64;
 ==>
 
 SourceFile(
-  TypeCastExpression(
+  ExpressionStatement(TypeCastExpression(
     Integer,
     as,
-    TypeIdentifier),
+    TypeIdentifier)),
   LetDeclaration(let,
     BoundIdentifier,
     TypeCastExpression(
@@ -195,15 +192,15 @@ add(
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     Identifier,
-    ArgList),
-  CallExpression(
+    ArgList)),
+  ExpressionStatement(CallExpression(
     Identifier,
-    ArgList(Integer, Integer)),
-  CallExpression(
+    ArgList(Integer, Integer))),
+  ExpressionStatement(CallExpression(
     Identifier,
-    ArgList(Integer, Integer)))
+    ArgList(Integer, Integer))))
 
 
 # Array expressions
@@ -216,18 +213,18 @@ SourceFile(
 ==>
 
 SourceFile(
-  ArrayExpression,
-  ArrayExpression(
+  ExpressionStatement(ArrayExpression),
+  ExpressionStatement(ArrayExpression(
     Integer,
     Integer,
-    Integer),
-  ArrayExpression(
+    Integer)),
+  ExpressionStatement(ArrayExpression(
     String,
     String,
-    String),
-  ArrayExpression(
+    String)),
+  ExpressionStatement(ArrayExpression(
     Integer,
-    Integer))
+    Integer)))
 
 
 # Tuple expressions
@@ -239,8 +236,8 @@ let (x, y, z) = (1, 2, 3);
 ==>
 
 SourceFile(
-  UnitExpression,
-  TupleExpression(Integer),
+  ExpressionStatement(UnitExpression),
+  ExpressionStatement(TupleExpression(Integer)),
   LetDeclaration(let,
     TuplePattern(BoundIdentifier, BoundIdentifier, BoundIdentifier),
     TupleExpression(Integer, Integer, Integer)))
@@ -256,12 +253,12 @@ let u = game::User {name: "Joe", age: 35, score: 100_000};
 ==>
 
 SourceFile(
-  StructExpression(TypeIdentifier,
-    FieldInitializerList),
-  StructExpression(TypeIdentifier,
+  ExpressionStatement(StructExpression(TypeIdentifier,
+    FieldInitializerList)),
+  ExpressionStatement(StructExpression(TypeIdentifier,
     FieldInitializerList(
       FieldInitializer(FieldIdentifier, Float),
-      FieldInitializer(FieldIdentifier, Float))),
+      FieldInitializer(FieldIdentifier, Float)))),
   LetDeclaration(let,
     BoundIdentifier,
     StructExpression(
@@ -317,7 +314,7 @@ SourceFile(
     BoundIdentifier,
     ParamList,
     Block(
-      IfExpression(if,
+      ExpressionStatement(IfExpression(if,
         BinaryExpression(
           Identifier,
           CompareOp,
@@ -331,7 +328,7 @@ SourceFile(
             Integer),
           Block,
           else,
-          Block)))),
+          Block))))),
   LetDeclaration(let,
     BoundIdentifier,
     IfExpression(if,
@@ -339,9 +336,9 @@ SourceFile(
         Identifier,
         CompareOp,
         Integer),
-      Block(Integer),
+      Block(ExpressionStatement(Integer)),
       else,
-      Block(Integer))))
+      Block(ExpressionStatement(Integer)))))
 
 
 # If let expressions
@@ -352,7 +349,7 @@ if let ("Bacon", b) = dish {
 ==>
 
 SourceFile(
-  IfExpression(if, LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier), Block))
+  ExpressionStatement(IfExpression(if, LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier), Block)))
 
 
 # While let expressions
@@ -363,9 +360,9 @@ while let ("Bacon", b) = dish {
 ==>
 
 SourceFile(
-  WhileExpression(while,
+  ExpressionStatement(WhileExpression(while,
     LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier),
-    Block))
+    Block)))
 
 
 # Match expressions
@@ -395,13 +392,13 @@ let msg = match x {
 ==>
 
 SourceFile(
-  MatchExpression(match,
+  ExpressionStatement(MatchExpression(match,
     Identifier,
     MatchBlock(
       MatchArm(
         Integer,
         Block(
-          String)),
+          ExpressionStatement(String))),
       MatchArm(
         Integer,
         String),
@@ -423,7 +420,7 @@ SourceFile(
           ParenthesizedTokens(
             Integer)),
         String),
-      MatchArm(_, String))),
+      MatchArm(_, String)))),
   LetDeclaration(let,
     BoundIdentifier,
     MatchExpression(match,
@@ -450,7 +447,7 @@ SourceFile(
           IfExpression(if,
             Identifier,
             Block(
-              String))),
+              ExpressionStatement(String)))),
         MatchArm(
           _,
           String)))))
@@ -465,12 +462,12 @@ while !done {
 ==>
 
 SourceFile(
-  WhileExpression(while,
+  ExpressionStatement(WhileExpression(while,
     UnaryExpression(LogicOp, Identifier),
     Block(
-      AssignmentExpression(
+      ExpressionStatement(AssignmentExpression(
         Identifier,
-        Boolean))))
+        Boolean))))))
 
 # Loop expressions
 
@@ -484,10 +481,10 @@ SourceFile(
 ==>
 
 SourceFile(
-  LoopExpression(LoopLabel, loop, Block(
-    LoopExpression(LoopLabel, loop, Block(
-      BreakExpression(break,LoopLabel),
-      BreakExpression(break,Boolean))))))
+  ExpressionStatement(LoopExpression(LoopLabel, loop, Block(
+    ExpressionStatement(LoopExpression(LoopLabel, loop, Block(
+      ExpressionStatement(BreakExpression(break,LoopLabel)),
+      ExpressionStatement(BreakExpression(break,Boolean)))))))))
 
 # For expressions
 
@@ -509,16 +506,16 @@ for i in 0..256 {
 ==>
 
 SourceFile(
-  ForExpression(for,BoundIdentifier, in, Identifier, Block(
-    CallExpression(Identifier, ArgList(Identifier)))),
-  ForExpression(for,BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
-    CallExpression(Identifier, ArgList(Identifier)))),
-  ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
-    ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
-      IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer), Block(
-        ContinueExpression(continue,LoopLabel))),
-      IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer), Block(
-        ContinueExpression(continue,LoopLabel))))))))
+  ExpressionStatement(ForExpression(for,BoundIdentifier, in, Identifier, Block(
+    ExpressionStatement(CallExpression(Identifier, ArgList(Identifier)))))),
+  ExpressionStatement(ForExpression(for,BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
+    ExpressionStatement(CallExpression(Identifier, ArgList(Identifier)))))),
+  ExpressionStatement(ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
+    ExpressionStatement(ForExpression(LoopLabel, for, BoundIdentifier, in, RangeExpression(Integer, Integer), Block(
+      ExpressionStatement(IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer),
+        Block(ExpressionStatement(ContinueExpression(continue,LoopLabel))))),
+      ExpressionStatement(IfExpression(if,BinaryExpression(BinaryExpression(Identifier, ArithOp, Integer), CompareOp, Integer),
+        Block(ExpressionStatement(ContinueExpression(continue,LoopLabel))))))))))))
 
 
 # Field expressions
@@ -531,15 +528,15 @@ value.0.1.iter();
 ==>
 
 SourceFile(
-  FieldExpression(Identifier, FieldIdentifier),
-  FieldExpression(CallExpression(Identifier, ArgList), FieldIdentifier),
-  CallExpression(
+  ExpressionStatement(FieldExpression(Identifier, FieldIdentifier)),
+  ExpressionStatement(FieldExpression(CallExpression(Identifier, ArgList), FieldIdentifier)),
+  ExpressionStatement(CallExpression(
     FieldExpression(
       FieldExpression(FieldExpression(Identifier, Integer), Integer),
       FieldIdentifier),
-    ArgList),
-  CallExpression(
-    FieldExpression(Integer, FieldIdentifier), ArgList(Integer)))
+    ArgList)),
+  ExpressionStatement(CallExpression(
+    FieldExpression(Integer, FieldIdentifier), ArgList(Integer))))
 
 
 # Method call expressions
@@ -548,7 +545,7 @@ mystruct.foo();
 
 ==>
 
-SourceFile(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList))
+SourceFile(ExpressionStatement(CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList)))
 
 
 # Index expressions
@@ -560,12 +557,12 @@ arr[n];
 ==>
 
 SourceFile(
-  IndexExpression(
+  ExpressionStatement(IndexExpression(
     ParenthesizedExpression(
       ArrayExpression(Integer, Integer, Integer, Integer)),
-    Integer),
-  IndexExpression(Identifier, Integer),
-  IndexExpression(Identifier, Identifier))
+    Integer)),
+  ExpressionStatement(IndexExpression(Identifier, Integer)),
+  ExpressionStatement(IndexExpression(Identifier, Identifier)))
 
 
 # Scoped functions
@@ -578,16 +575,16 @@ C::<D>::e();
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     ScopedIdentifier(ScopeIdentifier, Identifier),
-    ArgList),
-  CallExpression(
+    ArgList)),
+  ExpressionStatement(CallExpression(
     ScopedIdentifier(
       ScopeIdentifier, TypeArgList(TypeIdentifier),
       Identifier),
-    ArgList),
-  CallExpression(ScopedIdentifier(Identifier), ArgList),
-  CallExpression(ScopedIdentifier(ScopeIdentifier, Identifier), ArgList))
+    ArgList)),
+  ExpressionStatement(CallExpression(ScopedIdentifier(Identifier), ArgList)),
+  ExpressionStatement(CallExpression(ScopedIdentifier(ScopeIdentifier, Identifier), ArgList)))
 
 
 # Scoped functions with fully qualified syntax
@@ -597,11 +594,11 @@ SourceFile(
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     ScopedIdentifier(
       QualifiedScope(TypeIdentifier, as, TypeIdentifier),
       Identifier),
-    ArgList(Identifier)))
+    ArgList(Identifier))))
 
 
 # Scoped functions with macros as types
@@ -611,11 +608,11 @@ SourceFile(
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     ScopedIdentifier(
       QualifiedScope(MacroInvocation(TypeIdentifier, BracketedTokens)),
       Identifier),
-    ArgList))
+    ArgList)))
 
 
 # Generic functions
@@ -626,20 +623,20 @@ foo::<8>();
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     GenericFunction(
       ScopedIdentifier(
         ScopeIdentifier,
         Identifier),
       TypeArgList(
         TypeIdentifier)),
-    ArgList),
-  CallExpression(
+    ArgList)),
+  ExpressionStatement(CallExpression(
     GenericFunction(
       Identifier,
       TypeArgList(
         Integer)),
-    ArgList))
+    ArgList)))
 
 
 # Closures
@@ -654,29 +651,29 @@ h(|| -> i { j });
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(
       ClosureExpression(
         ParamList(Parameter(TuplePattern(BoundIdentifier, BoundIdentifier))),
         CallExpression(
           FieldExpression(Identifier, FieldIdentifier),
-          ArgList(Identifier))))),
-  CallExpression(
+          ArgList(Identifier)))))),
+  ExpressionStatement(CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(
       ClosureExpression(move,
         ParamList(Parameter(mut, BoundIdentifier)),
         Block(
-          CallExpression(Identifier, ArgList(Identifier)),
-          CallExpression(Identifier, ArgList(Identifier)))))),
-  CallExpression(
+          ExpressionStatement(CallExpression(Identifier, ArgList(Identifier))),
+          ExpressionStatement(CallExpression(Identifier, ArgList(Identifier)))))))),
+  ExpressionStatement(CallExpression(
     Identifier,
     ArgList(
       ClosureExpression(
         ParamList,
         TypeIdentifier,
-        Block(Identifier)))))
+        Block(ExpressionStatement(Identifier)))))))
 
 
 # Closures with typed parameteres
@@ -686,11 +683,11 @@ a.map(|b: usize| b.push(c));
 ==>
 
 SourceFile(
-  CallExpression(
+  ExpressionStatement(CallExpression(
     FieldExpression(Identifier, FieldIdentifier),
     ArgList(ClosureExpression(
       ParamList(Parameter(BoundIdentifier, TypeIdentifier)),
-      CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList(Identifier))))))
+      CallExpression(FieldExpression(Identifier, FieldIdentifier), ArgList(Identifier)))))))
 
 
 # Unsafe blocks
@@ -703,4 +700,4 @@ SourceFile(
   ConstItem(const,
     BoundIdentifier,
     TypeIdentifier,
-    UnsafeBlock(unsafe, Block(CallExpression(Identifier, ArgList)))))
+    UnsafeBlock(unsafe, Block(ExpressionStatement(CallExpression(Identifier, ArgList))))))

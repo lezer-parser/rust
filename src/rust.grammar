@@ -46,8 +46,10 @@
 statement {
   declarationStatement |
   AttributeItem |
-  blockExpression !statement |
-  nonBlockExpression ";"
+  ExpressionStatement {
+    blockExpression !statement |
+    nonBlockExpression ";"
+  }
 }
 
 AttributeItem { Attribute+ declarationStatement }
@@ -466,7 +468,13 @@ ClosureParamList[name=ParamList] {
   closureParamDelim commaSep<Parameter { (!mut kw<"mut">)? pattern (":" type)?}> closureParamDelim
 }
 
-Block { "{" InnerAttribute* statement* expression? "}" }
+Block {
+  "{"
+  InnerAttribute*
+  statement*
+  ExpressionStatement { expression }?
+  "}"
+}
 
 pattern {
   literalPattern |

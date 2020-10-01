@@ -15,17 +15,17 @@
 ==>
 
 SourceFile(
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer,
-  Integer)
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer),
+  ExpressionStatement(Integer))
 
 
 # Floating-point literals
@@ -40,12 +40,12 @@ SourceFile(
 ==>
 
 SourceFile(
-  Float,
-  Float,
-  Float,
-  Float,
-  Float,
-  Float)
+  ExpressionStatement(Float),
+  ExpressionStatement(Float),
+  ExpressionStatement(Float),
+  ExpressionStatement(Float),
+  ExpressionStatement(Float),
+  ExpressionStatement(Float))
 
 
 # String literals
@@ -63,14 +63,14 @@ b"foo\nbar";
 ==>
 
 SourceFile(
-  String,
-  String,
-  String(Escape),
-  String(Escape),
-  String(Escape, Escape),
-  String,
-  String(Escape, Escape),
-  String(Escape, Escape))
+  ExpressionStatement(String),
+  ExpressionStatement(String),
+  ExpressionStatement(String(Escape)),
+  ExpressionStatement(String(Escape)),
+  ExpressionStatement(String(Escape, Escape)),
+  ExpressionStatement(String),
+  ExpressionStatement(String(Escape, Escape)),
+  ExpressionStatement(String(Escape, Escape)))
 
 
 # Raw string literals
@@ -83,11 +83,11 @@ r######"foo ##### bar"######;
 ==>
 
 SourceFile(
-  RawString,
-  RawString,
-  RawString,
-  RawString,
-  RawString)
+  ExpressionStatement(RawString),
+  ExpressionStatement(RawString),
+  ExpressionStatement(RawString),
+  ExpressionStatement(RawString),
+  ExpressionStatement(RawString))
 
 
 # Raw byte string literals
@@ -98,8 +98,8 @@ br##"abc"##;
 ==>
 
 SourceFile(
-  RawString,
-  RawString)
+  ExpressionStatement(RawString),
+  ExpressionStatement(RawString))
 
 
 # Character literals
@@ -115,13 +115,13 @@ b'x';
 ==>
 
 SourceFile(
-  Char,
-  Char,
-  Char,
-  Char,
-  Char,
-  Char,
-  Char)
+  ExpressionStatement(Char),
+  ExpressionStatement(Char),
+  ExpressionStatement(Char),
+  ExpressionStatement(Char),
+  ExpressionStatement(Char),
+  ExpressionStatement(Char),
+  ExpressionStatement(Char))
 
 
 # Boolean literals
@@ -131,5 +131,5 @@ false;
 
 ==>
 
-SourceFile(Boolean, Boolean)
+SourceFile(ExpressionStatement(Boolean), ExpressionStatement(Boolean))
 
