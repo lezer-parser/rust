@@ -212,7 +212,7 @@ RemovedTraitBound {
   "?" type
 }
 
-typeParam[inline] {
+typeParam[@inline] {
   Lifetime |
   Metavariable |
   TypeIdentifier |
@@ -362,7 +362,7 @@ MacroInvocation {
   path !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens)
 }
 
-MacroInvocationSemi[name=MacroInvocation] {
+MacroInvocationSemi[@name=MacroInvocation] {
   path !macro "!" ((ParenthesizedTokens | BracketedTokens) !macroSemi ";" | BracedTokens !macroSemi)
 }
 
@@ -398,7 +398,7 @@ typePath {
   }
 }
 
-simplePathPrefix[inline] {
+simplePathPrefix[@inline] {
   "::" (pathIdent<ScopeIdentifier> ~path !scope "::")* |
   (pathIdent<ScopeIdentifier> ~path !scope "::")+
 }
@@ -464,7 +464,7 @@ MatchArm<after> {
   "=>" (nonBlockExpression after | !block blockExpression)
 }
 
-ClosureParamList[name=ParamList] {
+ClosureParamList[@name=ParamList] {
   closureParamDelim commaSep<Parameter { (!mut kw<"mut">)? pattern (":" type)?}> closureParamDelim
 }
 
@@ -514,7 +514,7 @@ literalPattern {
   NegatedPattern { ArithOp { "-" } (Integer | Float) }
 }
 
-boolean { @specialize[name=Boolean]<identifier, "true" | "false"> }
+boolean { @specialize[@name=Boolean]<identifier, "true" | "false"> }
 
 @skip {} {
   BlockComment { "/*" (BlockComment | blockCommentContent)* blockCommentEnd }
@@ -536,9 +536,9 @@ LoopLabel { quoteIdentifier }
 
 Lifetime { quoteIdentifier }
 
-kw<term> { @specialize[name={term}]<identifier, term> }
+kw<term> { @specialize[@name={term}]<identifier, term> }
 
-ckw<term> { @extend[name={term}]<identifier, term> }
+ckw<term> { @extend[@name={term}]<identifier, term> }
 
 commaSep<expr> { commaSep1<expr>? }
 
@@ -546,9 +546,9 @@ commaSep1<expr> { expr ("," expr?)* }
 
 plusSep<expr> { expr (!plusSep "+" expr)* }
 
-@external tokens closureParam from "./tokens" { closureParamDelim[name="|"] }
+@external tokens closureParam from "./tokens" { closureParamDelim[@name="|"] }
 
-@external tokens tpDelim from "./tokens" { tpOpen[name="<"], tpClose[name=">"] }
+@external tokens tpDelim from "./tokens" { tpOpen[@name="<"], tpClose[@name=">"] }
 
 @external tokens literalTokens from "./tokens" { RawString, Float }
 
@@ -592,7 +592,7 @@ plusSep<expr> { expr (!plusSep "+" expr)* }
 
   identBase { $[a-zA-Zα-ωΑ-Ωµ_] $[a-zA-Zα-ωΑ-Ωµ0-9_]* }
   identifier { ("r#")? identBase }
-  tokenIdentifier[name=Identifier] { identBase }
+  tokenIdentifier[@name=Identifier] { identBase }
   quoteIdentifier { "'" identBase }
   Metavariable { "$" identBase }
 
