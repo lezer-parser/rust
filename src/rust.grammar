@@ -43,7 +43,7 @@
   statement*
 }
 
-statement {
+statement[@isGroup=Statement] {
   declarationStatement |
   AttributeItem |
   ExpressionStatement {
@@ -271,7 +271,7 @@ Vis {
   kw<"crate"> !crateVis
 }
 
-type {
+type[@isGroup=Type] {
   AbstractType { kw<"impl"> (typePath | GenericType | FunctionType) } |
   ReferenceType { "&" Lifetime? kw<"mut">? type } |
   PointerType { "*" (kw<"const"> | kw<"mut">) type } |
@@ -308,7 +308,7 @@ TypeBinding {
   TypeIdentifier "=" type
 }
 
-expression { blockExpression | nonBlockExpression }
+expression[@isGroup=Expression] { blockExpression | nonBlockExpression }
 
 nonBlockExpression {
   UnaryExpression { (ArithOp { "-" } | DerefOp { "*" } | LogicOp { "!" }) !unary expression } |
@@ -330,7 +330,7 @@ nonBlockExpression {
   IndexExpression { expression !deref "[" expression "]" } |
   ArrayExpression { "[" InnerAttribute* (expression ";" expression | commaSep1<expression>)? "]" } |
   TupleExpression { "(" InnerAttribute* expression ("," expression?)+ ")" } |
-  MacroInvocation |
+  MacroInvocation { macroInvocation } |
   UnitExpression { "(" ")" } |
   ClosureExpression { kw<"move">? ClosureParamList (("->" type)? !statement Block | expression) } |
   ParenthesizedExpression { "(" InnerAttribute* expression ")" } |
@@ -358,7 +358,7 @@ blockExpression {
   }
 }
 
-MacroInvocation {
+macroInvocation {
   path !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens)
 }
 
@@ -392,7 +392,9 @@ typePathSegment {
 }
 
 typePath {
-  pathIdent<TypeIdentifier> ~path |
+  SelfType { kw<"self"> } ~path |
+  MetaType { Metavariable } ~path |
+  TypeIdentifier ~path |
   ScopedTypeIdentifier {
     (("::" | QualifiedScope !scope "::") typePathSegment* | typePathSegment+) pathIdent<TypeIdentifier> ~path
   }
@@ -416,7 +418,9 @@ structName {
 }
 
 patternPath {
-  pathIdent<BoundIdentifier> ~path |
+  MetaPattern { Metavariable ~path } |
+  BoundIdentifier ~path |
+  SelfPattern { kw<"self"> ~path } |
   ScopedIdentifier {
     (("::" | QualifiedScope !scope "::") pathSegment* | pathSegment+) pathIdent<Identifier> ~path
   }
@@ -476,8 +480,8 @@ Block {
   "}"
 }
 
-pattern {
-  literalPattern |
+pattern[@isGroup=Pattern] {
+  LiteralPattern { literalPattern } |
   patternPath |
   TuplePattern { structName? "(" commaSep<pattern> ")" } |
   StructPattern {
@@ -492,7 +496,7 @@ pattern {
   MutPattern { kw<"mut"> !unary pattern } |
   RangePattern { (literalPattern | path) ("..." | "..=") (literalPattern | path) } |
   OrPattern { pattern !or "|" pattern } |
-  MacroInvocation |
+  MacroPattern { macroInvocation } |
   kw<"_">
 }
 
@@ -511,7 +515,7 @@ literal {
 
 literalPattern {
   literal |
-  NegatedPattern { ArithOp { "-" } (Integer | Float) }
+  ArithOp { "-" } (Integer | Float)
 }
 
 boolean { @specialize[@name=Boolean]<identifier, "true" | "false"> }

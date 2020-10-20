@@ -349,7 +349,8 @@ if let ("Bacon", b) = dish {
 ==>
 
 SourceFile(
-  ExpressionStatement(IfExpression(if, LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier), Block)))
+  ExpressionStatement(IfExpression(if, LetDeclaration(let, TuplePattern(LiteralPattern(String), BoundIdentifier), Identifier),
+    Block)))
 
 
 # While let expressions
@@ -361,7 +362,7 @@ while let ("Bacon", b) = dish {
 
 SourceFile(
   ExpressionStatement(WhileExpression(while,
-    LetDeclaration(let, TuplePattern(String, BoundIdentifier), Identifier),
+    LetDeclaration(let, TuplePattern(LiteralPattern(String), BoundIdentifier), Identifier),
     Block)))
 
 
@@ -396,26 +397,26 @@ SourceFile(
     Identifier,
     MatchBlock(
       MatchArm(
-        Integer,
+        LiteralPattern(Integer),
         Block(
           ExpressionStatement(String))),
       MatchArm(
-        Integer,
+        LiteralPattern(Integer),
         String),
       MatchArm(
-        NegatedPattern(ArithOp, Integer),
+        LiteralPattern(ArithOp, Integer),
         Integer),
       MatchArm(
-        NegatedPattern(ArithOp, Float),
+        LiteralPattern(ArithOp, Float),
         Integer),
       MatchArm(
         Attribute(
           MetaItem(
             Identifier)),
-        Integer,
+        LiteralPattern(Integer),
         String),
       MatchArm(
-        MacroInvocation(
+        MacroPattern(
           Identifier,
           ParenthesizedTokens(
             Integer)),
@@ -427,7 +428,7 @@ SourceFile(
       Identifier,
       MatchBlock(
         MatchArm(
-          OrPattern(OrPattern(Integer, Integer), Integer),
+          OrPattern(OrPattern(LiteralPattern(Integer), LiteralPattern(Integer)), LiteralPattern(Integer)),
           String),
         MatchArm(
           BoundIdentifier,

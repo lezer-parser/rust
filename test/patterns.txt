@@ -216,6 +216,6 @@ SourceFile(
     ParamList(
       Parameter(
         TuplePattern(
-          OrPattern(OrPattern(Integer, Integer), Integer)),
+          OrPattern(OrPattern(LiteralPattern(Integer), LiteralPattern(Integer)), LiteralPattern(Integer))),
         TypeIdentifier)),
     Block))
