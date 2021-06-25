@@ -1,4 +1,4 @@
-import {ExternalTokenizer} from "lezer"
+import {ExternalTokenizer} from "@lezer/lr"
 import {Float, RawString, closureParamDelim, tpOpen, tpClose} from "./parser.terms"
 
 const _b = 98, _e = 101, _f = 102, _r = 114, _E = 69, Zero = 48,
