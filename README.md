@@ -1,4 +1,4 @@
-# lezer-rust
+# @lezer/rust
 
 This is a Rust grammar for the
 [Lezer](https://lezer.codemirror.net/) parser system.
