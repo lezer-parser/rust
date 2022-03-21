@@ -1,3 +1,9 @@
+## 0.15.1 (2022-03-21)
+
+### Bug fixes
+
+Allow arbitrary token trees after `=` in attributes.
+
 ## 0.15.0 (2021-08-11)
 
 ### Breaking changes
