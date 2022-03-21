@@ -707,6 +707,7 @@ struct Foo;
 
 #[cfg(target_os = "macos")]
 #[clippy::cyclomatic_complexity = "100"]
+#[a = b]
 mod macos_only {}
 
 ==>
@@ -742,14 +743,11 @@ SourceFile(
   AttributeItem(
     Attribute(MetaItem(
       Identifier,
-      MetaItem(
-        Identifier,
-        String))),
+      MetaItem(Identifier, String))),
     Attribute(MetaItem(
-      ScopedIdentifier(
-        ScopeIdentifier,
-        Identifier),
+      ScopedIdentifier(ScopeIdentifier, Identifier),
       String)),
+    Attribute(MetaItem(Identifier, Identifier)),
     ModItem(mod,
       BoundIdentifier,
       DeclarationList)))

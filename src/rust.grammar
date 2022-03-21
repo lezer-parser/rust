@@ -165,7 +165,7 @@ InnerAttribute {
 }
 
 MetaItem {
-  path ("=" literal | "(" commaSep<MetaItem | literal> ")")?
+  path ("=" tokenTree | "(" commaSep<MetaItem | literal> ")")?
 }
 
 DeclarationList {
