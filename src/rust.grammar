@@ -611,4 +611,6 @@ plusSep<expr> { expr (!plusSep "+" expr)* }
   "&" "!"
 }
 
+@external propSource rustHighlighting from "./highlight"
+
 @detectDelim
