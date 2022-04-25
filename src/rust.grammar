@@ -119,12 +119,12 @@ declarationStatement {
   }
 }
 
-MacroRule {
-  tokenTree "=>" (ParenthesizedTokens | BracketedTokens | BracedTokens)
-}
+delimitedTokenTree { ParenthesizedTokens | BracketedTokens | BracedTokens }
+
+MacroRule { tokenTree "=>" delimitedTokenTree }
 
 tokenTree {
-  ParenthesizedTokens | BracketedTokens | BracedTokens |
+  delimitedTokenTree |
   TokenBinding {
     Metavariable !bind ":" tokenIdentifier
   } |
@@ -165,7 +165,7 @@ InnerAttribute {
 }
 
 MetaItem {
-  path ("=" tokenTree | "(" commaSep<MetaItem | literal> ")")?
+  path ("=" tokenTree | delimitedTokenTree)?
 }
 
 DeclarationList {
@@ -281,7 +281,7 @@ type[@isGroup=Type] {
   UnitType { "(" ")" } |
   ArrayType { "[" type (";" expression)? "]" } |
   FunctionType |
-  MacroInvocation { typePath !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens) } |
+  MacroInvocation { typePath !macro "!" delimitedTokenTree } |
   EmptyType { "!" } |
   DynamicType { kw<"dyn"> (typePath | GenericType | FunctionType) } |
   BoundedType { Lifetime !bound "+" type | type !bound "+" type | type !bound "+" Lifetime }
@@ -359,7 +359,7 @@ blockExpression {
 }
 
 macroInvocation {
-  path !macro "!" (ParenthesizedTokens | BracketedTokens | BracedTokens)
+  path !macro "!" delimitedTokenTree
 }
 
 MacroInvocationSemi[@name=MacroInvocation] {

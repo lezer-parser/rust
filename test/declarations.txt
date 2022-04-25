@@ -715,10 +715,7 @@ mod macos_only {}
 SourceFile(
   InnerAttribute(MetaItem(
     Identifier,
-    MetaItem(
-      ScopedIdentifier(
-        ScopeIdentifier,
-        Identifier)))),
+    ParenthesizedTokens(Identifier,Identifier))),
 
   AttributeItem(
     Attribute(MetaItem(Identifier)),
@@ -730,20 +727,19 @@ SourceFile(
   AttributeItem(
     Attribute(MetaItem(
       Identifier,
-      MetaItem(Identifier))),
+      ParenthesizedTokens(Identifier))),
     StructItem(struct,TypeIdentifier)),
 
   AttributeItem(
     Attribute(MetaItem(
       Identifier,
-      MetaItem(Identifier),
-      MetaItem(Identifier))),
+      ParenthesizedTokens(Identifier, Identifier))),
    StructItem(struct,TypeIdentifier)),
 
   AttributeItem(
     Attribute(MetaItem(
       Identifier,
-      MetaItem(Identifier, String))),
+      ParenthesizedTokens(Identifier, String))),
     Attribute(MetaItem(
       ScopedIdentifier(ScopeIdentifier, Identifier),
       String)),
@@ -766,7 +762,7 @@ SourceFile(
     DeclarationList(
       InnerAttribute(MetaItem(
         Identifier,
-        MetaItem(
+        ParenthesizedTokens(
           Identifier,
           String))))))
 
@@ -793,9 +789,7 @@ SourceFile(
           Identifier,
             Attribute(MetaItem(
               Identifier,
-              MetaItem(
-                Identifier,
-                String))),
+              ParenthesizedTokens(Identifier, String))),
             Identifier))),
       LetDeclaration(let,
         BoundIdentifier,
@@ -1288,3 +1282,14 @@ const ψ_2 : Ψ = 1;
 SourceFile(
   ConstItem(const,BoundIdentifier, TypeIdentifier, Integer),
   ConstItem(const,BoundIdentifier, TypeIdentifier, Integer))
+
+# Allows keywords in attributes
+
+#[foo(mut)]
+const a: i32 = 5;
+
+==>
+
+SourceFile(AttributeItem(
+  Attribute(MetaItem(Identifier,ParenthesizedTokens(Identifier))),
+  ConstItem(const,BoundIdentifier,TypeIdentifier,Integer)))
