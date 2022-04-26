@@ -1,6 +1,6 @@
 {
   "name": "@lezer/rust",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Lezer-based Rust grammar",
   "main": "dist/index.cjs",
   "type": "module",

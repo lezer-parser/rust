@@ -1,3 +1,9 @@
+## 0.16.1 (2022-04-26)
+
+### Bug fixes
+
+Allow arbitrary bracketed token trees to appear after attribute names
+
 ## 0.16.0 (2022-04-20)
 
 ### Breaking changes
