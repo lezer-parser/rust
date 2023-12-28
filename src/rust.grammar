@@ -521,9 +521,9 @@ literalPattern {
 boolean { @specialize[@name=Boolean]<identifier, "true" | "false"> }
 
 @skip {} {
-  BlockComment { "/*" (BlockComment | blockCommentContent)* blockCommentEnd }
+  BlockComment[isolate] { "/*" (BlockComment | blockCommentContent)* blockCommentEnd }
 
-  String { stringStart (Escape | stringContent)* stringEnd }
+  String[isolate] { stringStart (Escape | stringContent)* stringEnd }
 }
 
 Identifier { identifier }
@@ -554,7 +554,7 @@ plusSep<expr> { expr (!plusSep "+" expr)* }
 
 @external tokens tpDelim from "./tokens" { tpOpen[@name="<"], tpClose[@name=">"] }
 
-@external tokens literalTokens from "./tokens" { RawString, Float }
+@external tokens literalTokens from "./tokens" { RawString[isolate], Float }
 
 @tokens {
   whitespace { $[ \t\r\n] }
@@ -576,7 +576,7 @@ plusSep<expr> { expr (!plusSep "+" expr)* }
 
   Char { "b"? "'" (Escape | ![\\'])? "'" }
 
-  LineComment { "//" ![\n]* }
+  LineComment[isolate] { "//" ![\n]* }
 
   @precedence { LineComment, "/" }
 
