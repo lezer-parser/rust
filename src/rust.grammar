@@ -90,7 +90,7 @@ declarationStatement {
   } |
   FunctionItem {
     Vis? functionModifier* kw<"fn">
-    (BoundIdentifier | Metavariable) TypeParamList? ParamList ("->" type)?
+    functionName TypeParamList? ParamList ("->" type)?
     WhereClause?
     (Block | ";")
   } |
@@ -118,6 +118,8 @@ declarationStatement {
     Vis? kw<"static"> kw<"ref">? kw<"mut">? BoundIdentifier ":" type ("=" expression)? ";"
   }
 }
+
+functionName { BoundIdentifier | Metavariable }
 
 delimitedTokenTree { ParenthesizedTokens | BracketedTokens | BracedTokens }
 
