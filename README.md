@@ -1,3 +1,5 @@
+**This repository has moved to https://code.haverbeke.berlin/lezer/rust**
+
 # @lezer/rust
 
 This is a Rust grammar for the
